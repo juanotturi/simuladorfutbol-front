@@ -1,7 +1,7 @@
 <h1>Simulador de Fútbol</h1>
 <nav>
-  <a routerLink="/teams">Equipos</a> |
-  <a routerLink="/play-match">Jugar Partido</a>
+  <button (click)="goToTeams()">Equipos</button> | 
+  <button (click)="goToPlay()">Jugar Partido</button>
 </nav>
-<hr />
+<hr>
 <router-outlet></router-outlet>

@@ -1,8 +1,8 @@
-<h2>Listado de Equipos</h2>
-
-<div *ngIf="isLoading">Cargando equipos...</div>
-<ul *ngIf="!isLoading">
-  <li *ngFor="let team of teams">
-    {{ team.name }} ({{ team.code }}) - {{ team.confederation }} - {{ team.score }}
-  </li>
-</ul>
+<div *ngIf="isVisible">
+  <div *ngIf="isLoading">Cargando equipos...</div>
+  <ul *ngIf="!isLoading">
+    <li *ngFor="let team of teams">
+      {{ team.name }} ({{ team.code }}) - {{ team.confederation }} - {{ team.score }}
+    </li>
+  </ul>
+</div>
