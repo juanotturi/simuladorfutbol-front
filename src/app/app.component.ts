@@ -18,14 +18,17 @@ export class AppComponent {
     private navigationService: NavigationService
   ) {}
 
+  goToHome() {
+    this.router.navigate(['/home']);
+  }
+
   goToTeams() {
     this.router.navigate(['/teams']).then(() => {
-      this.navigationService.requestTeamsToggle();
+      this.navigationService.requestLoadTeams();
     });
   }
   
   goToPlay() {
-    this.navigationService.setTeamsVisibility(false);
     this.router.navigate(['/play-match']);
   }
 }

@@ -16,7 +16,6 @@ export class TeamsListComponent implements OnInit, OnDestroy {
 
   teams: Team[] = [];
   isLoading = false;
-  isVisible = false;
   private subscription?: Subscription;
 
   constructor(
@@ -25,30 +24,11 @@ export class TeamsListComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.isVisible = this.navigationService.getTeamsVisibility();
-
-    if (this.isVisible && this.teams.length === 0) {
+    this.subscription = this.navigationService.loadTeams$.subscribe(() => {
       this.loadTeams();
-    }
-
-    this.subscription = this.navigationService.toggleTeams$.subscribe((visible) => {
-      this.isVisible = visible;
-      if (this.isVisible && this.teams.length === 0) {
-        this.loadTeams();
-      } else if (!this.isVisible) {
-        this.teams = [];
-      }
     });
-  }
 
-  toggleTeams() {
-    if (this.isVisible) {
-      this.isVisible = false;
-      this.teams = [];
-    } else {
-      this.isVisible = true;
-      this.loadTeams();
-    }
+    this.loadTeams();
   }
 
   loadTeams() {
