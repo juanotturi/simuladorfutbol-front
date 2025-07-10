@@ -5,8 +5,9 @@ import { CommonModule } from '@angular/common';
   selector: 'app-home',
   standalone: true,
   imports: [CommonModule],
-  template: `<h3>Bienvenido al Simulador de Fútbol</h3>`
+  templateUrl: './home.component.html',
 })
+
 export class HomeComponent {
 
 }

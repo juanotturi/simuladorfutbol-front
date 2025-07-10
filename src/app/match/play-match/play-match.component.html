@@ -1,1 +1,33 @@
-<p>play-match works!</p>
+<h3>Jugar Partido</h3>
+
+<div *ngIf="isLoading">Cargando equipos...</div>
+
+<div *ngIf="!isLoading">
+  <label>Equipo A:
+    <select [(ngModel)]="selectedTeamA">
+      <option [ngValue]="null">-- Selecciona un equipo --</option>
+      <option *ngFor="let team of teams" [ngValue]="team">
+        {{ team.name }} ({{ team.score }})
+      </option>
+    </select>
+  </label>
+
+  <br>
+
+  <label>Equipo B:
+    <select [(ngModel)]="selectedTeamB">
+      <option [ngValue]="null">-- Selecciona un equipo --</option>
+      <option *ngFor="let team of teams" [ngValue]="team">
+        {{ team.name }} ({{ team.score }})
+      </option>
+    </select>
+  </label>
+
+  <br><br>
+  <button (click)="playMatch()">Jugar Partido</button>
+
+  <div *ngIf="matchResult">
+    <h3>Resultado</h3>
+    <p>{{ selectedTeamA?.name }} {{ matchResult.goalsTeamA }} - {{ matchResult.goalsTeamB }} {{ selectedTeamB?.name }}</p>
+  </div>
+</div>
