@@ -26,8 +26,22 @@
   <br><br>
   <button (click)="playMatch()">Jugar Partido</button>
 
-  <div *ngIf="matchResult">
-    <h3>Resultado</h3>
-    <p>{{ selectedTeamA?.name }} {{ matchResult.goalsTeamA }} - {{ matchResult.goalsTeamB }} {{ selectedTeamB?.name }}</p>
+<div *ngIf="matchResult">
+  <h3>Resultado</h3>
+  <div style="display: flex; justify-content: center; align-items: center; gap: 48px;">
+    <div style="text-align: center;">
+      <img [src]="selectedTeamA?.image" alt="{{ selectedTeamA?.name }}" class="flag-large">
+      <div style="margin-top: 8px; font-weight: bold;">{{ selectedTeamA?.name }}</div>
+    </div>
+
+    <div style="font-size: 32px; font-weight: bold;">
+      {{ matchResult.goalsTeamA }} - {{ matchResult.goalsTeamB }}
+    </div>
+
+    <div style="text-align: center;">
+      <img [src]="selectedTeamB?.image" alt="{{ selectedTeamB?.name }}" class="flag-large">
+      <div style="margin-top: 8px; font-weight: bold;">{{ selectedTeamB?.name }}</div>
+    </div>
   </div>
+</div>
 </div>

@@ -1,7 +1,14 @@
 <h3>Listado de Equipos</h3>
 <div *ngIf="isLoading">Cargando equipos...</div>
 <ul *ngIf="!isLoading">
-  <li *ngFor="let team of teams">
-    {{ team.name }} ({{ team.code }}) - {{ team.confederation }} - {{ team.score }}
+  <li *ngFor="let team of teams" class="team-item">
+    <img
+      *ngIf="team.image"
+      [src]="team.image"
+      [alt]="team.name"
+      class="flag-icon"
+    />
+    <span>{{ team.name }} ({{ team.code }}) - {{ team.confederation }}</span>
   </li>
 </ul>
+
