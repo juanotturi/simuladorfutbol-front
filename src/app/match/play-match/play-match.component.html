@@ -3,8 +3,8 @@
 <div *ngIf="isLoading">Cargando equipos...</div>
 
 <div *ngIf="!isLoading">
-  <label>Equipo A:
-    <select [(ngModel)]="selectedTeamA">
+  <label>Equipo 1:
+    <select [(ngModel)]="selectedTeamA" [disabled]="isMatchPlayed || penaltyShootoutActive">
       <option [ngValue]="null">-- Selecciona un equipo --</option>
       <option *ngFor="let team of teams" [ngValue]="team">
         {{ team.name }} ({{ team.score }})
@@ -14,8 +14,8 @@
 
   <br>
 
-  <label>Equipo B:
-    <select [(ngModel)]="selectedTeamB">
+  <label>Equipo 2:
+    <select [(ngModel)]="selectedTeamB" [disabled]="isMatchPlayed || penaltyShootoutActive">
       <option [ngValue]="null">-- Selecciona un equipo --</option>
       <option *ngFor="let team of teams" [ngValue]="team">
         {{ team.name }} ({{ team.score }})
@@ -24,24 +24,60 @@
   </label>
 
   <br><br>
-  <button (click)="playMatch()">Jugar Partido</button>
+  <button (click)="playMatch()" [disabled]="isMatchPlayed || penaltyShootoutActive">Jugar Partido</button>
 
-<div *ngIf="matchResult">
   <h3>Resultado</h3>
+
   <div style="display: flex; justify-content: center; align-items: center; gap: 48px;">
     <div style="text-align: center;">
-      <img [src]="selectedTeamA?.image" alt="{{ selectedTeamA?.name }}" class="flag-large">
-      <div style="margin-top: 8px; font-weight: bold;">{{ selectedTeamA?.name }}</div>
+      <img [src]="selectedTeamA?.image || placeholderImage" alt="{{ selectedTeamA?.name || 'Equipo 1' }}" class="flag-large">
+      <div style="margin-top: 8px; font-weight: bold;">
+        {{ selectedTeamA?.name || 'Equipo 1' }}
+      </div>
     </div>
 
     <div style="font-size: 32px; font-weight: bold;">
-      {{ matchResult.goalsTeamA }} - {{ matchResult.goalsTeamB }}
+      {{ matchResult?.goalsTeamA ?? '' }} - {{ matchResult?.goalsTeamB ?? '' }}
     </div>
 
     <div style="text-align: center;">
-      <img [src]="selectedTeamB?.image" alt="{{ selectedTeamB?.name }}" class="flag-large">
-      <div style="margin-top: 8px; font-weight: bold;">{{ selectedTeamB?.name }}</div>
+      <img [src]="selectedTeamB?.image || placeholderImage" alt="{{ selectedTeamB?.name || 'Equipo 2' }}" class="flag-large">
+      <div style="margin-top: 8px; font-weight: bold;">
+        {{ selectedTeamB?.name || 'Equipo 2' }}
+      </div>
     </div>
+  <div style="margin-top: 16px;">
+    <button *ngIf="isMatchPlayed" (click)="resetMatch()" [disabled]="penaltyShootoutActive">
+      Reiniciar
+    </button>
+    <button *ngIf="matchResult && matchResult.goalsTeamA === matchResult.goalsTeamB && !penaltyShootoutActive && penaltyWinner == null" (click)="startPenaltyShootout()">
+      Ir a penales
+    </button>
   </div>
-</div>
-</div>
+  <div *ngIf="penaltyShootoutActive">
+    <h3>Definición por penales</h3>
+
+    <p>Turno: {{ currentShooter === 0 ? selectedTeamA?.name : selectedTeamB?.name }}</p>
+
+    <button (click)="takePenalty()" [disabled]="penaltyWinner">Patear penal</button>
+
+    <div class="penalty-grids">
+      <div>
+        <h4>{{ selectedTeamA?.name }}</h4>
+        <div class="penalty-row">
+          <span *ngFor="let r of penaltyTurns[0]">{{ r }}</span>
+        </div>
+      </div>
+      <div>
+        <h4>{{ selectedTeamB?.name }}</h4>
+        <div class="penalty-row">
+          <span *ngFor="let r of penaltyTurns[1]">{{ r }}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div *ngIf="penaltyWinner">
+    <h3>¡Ganador por penales!</h3>
+    <p>{{ penaltyWinner.name }}</p>
+  </div>
