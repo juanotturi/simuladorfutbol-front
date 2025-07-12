@@ -24,6 +24,7 @@ export class PlayMatchComponent implements OnInit {
 
   // Control de penales
   penaltyShootoutActive = false;
+  penaltyVisible = false;
   penaltyTurns: ('✅' | '❌')[][] = [[], []];
   currentShooter: 0 | 1 = 0;
   penaltyWinner: Team | null = null;
@@ -77,6 +78,7 @@ export class PlayMatchComponent implements OnInit {
   startPenaltyShootout() {
     this.penaltyShootoutActive = true;
     this.isPenaltyInProgress = true;
+    this.penaltyVisible = true;
     this.penaltyTurns = [[], []];
     this.penaltyWinner = null;
     this.isSuddenDeath = false;
@@ -130,12 +132,12 @@ export class PlayMatchComponent implements OnInit {
         return;
       }
     } else {
-      if (aResults.length > this.maxPenalties && bResults.length > this.maxPenalties) {
+      if (aResults.length > this.maxPenalties && bResults.length > this.maxPenalties && aResults.length === bResults.length) {
         const lastA = aResults[aResults.length - 1];
         const lastB = bResults[bResults.length - 1];
         if (lastA !== lastB) {
           this.penaltyWinner = lastA === '✅' ? this.selectedTeamA! : this.selectedTeamB!;
-          this.endPenalties();
+          this.penaltyShootoutActive = false;
         }
       }
     }
@@ -146,6 +148,16 @@ export class PlayMatchComponent implements OnInit {
     this.isPenaltyInProgress = false;
   }
 
+  getPenaltySlots(teamIndex: number): ('✅' | '❌' | '⬜')[] {
+    const actual = this.penaltyTurns[teamIndex];
+    const size = Math.max(this.maxPenalties, actual.length);
+    return Array.from({ length: size }, (_, idx) => actual[idx] || '⬜');
+  }
+
+  isInteractionBlocked(): boolean {
+    return this.isMatchPlayed || this.penaltyShootoutActive;
+  }
+
   resetMatch() {
     this.selectedTeamA = undefined;
     this.selectedTeamB = undefined;
@@ -153,6 +165,7 @@ export class PlayMatchComponent implements OnInit {
     this.isMatchPlayed = false;
     this.penaltyShootoutActive = false;
     this.isPenaltyInProgress = false;
+    this.penaltyVisible = false;
     this.penaltyWinner = null;
     this.penaltyTurns = [[], []];
     this.isSuddenDeath = false;
