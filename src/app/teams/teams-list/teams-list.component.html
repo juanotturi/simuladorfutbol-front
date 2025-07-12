@@ -1,13 +1,40 @@
-<h3>Listado de Equipos</h3>
-<div *ngIf="isLoading">Cargando equipos...</div>
-<ul *ngIf="!isLoading">
-  <li *ngFor="let team of teams" class="team-item">
+<h3>Elegí categoría</h3>
+<div class="tabs">
+  <button [class.active]="selectedTab === 'SELECCIONES'" (click)="selectedTab = 'SELECCIONES'">
+    Selecciones
+  </button>
+  <button [class.active]="selectedTab === 'CLUBES'" (click)="selectedTab = 'CLUBES'">
+    Clubes
+  </button>
+</div>
+
+<div *ngIf="selectedTab">
+  <h3>Filtros</h3>
+  <div class="filters">
+    <label *ngIf="selectedTab === 'SELECCIONES'">
+      Confederación:
+      <select [(ngModel)]="selectedConfederation">
+        <option value="">Todas</option>
+        <option *ngFor="let conf of confederations" [value]="conf">{{ conf }}</option>
+      </select>
+    </label>
+
+    <label>
+      Buscar por nombre:
+      <input type="text" [(ngModel)]="searchName" placeholder="Ingresá el nombre">
+    </label>
+  </div>
+</div>
+
+<ul *ngIf="selectedTab && !isLoading">
+  <li *ngFor="let team of filteredTeams" class="team-item">
     <img
       *ngIf="team.image"
       [src]="team.image"
       [alt]="team.name"
       class="flag-icon"
     />
-    <span>{{ team.name }} ({{ team.code }}) - {{ team.confederation }}</span>
+    <span>{{ team.name }} ({{ team.code }}) - {{ team.confederation || team.league }}</span>
   </li>
 </ul>
+

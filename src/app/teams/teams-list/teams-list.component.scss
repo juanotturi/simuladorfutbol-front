@@ -8,3 +8,26 @@
   width: 30px;
   margin-right: 8px;
 }
+
+.tabs button {
+  margin-right: 8px;
+  padding: 8px 16px;
+  border: none;
+  background-color: #ddd;
+  cursor: pointer;
+}
+
+.tabs button.active {
+  background-color: #bbb;
+  font-weight: bold;
+}
+
+.filters {
+  margin-top: 16px;
+}
+
+.team-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}

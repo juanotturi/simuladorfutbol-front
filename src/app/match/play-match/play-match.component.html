@@ -1,6 +1,6 @@
 <h3>Jugar Partido</h3>
 
-<div *ngIf="isLoading">Cargando equipos...</div>
+<div *ngIf="isLoading">Cargando partido...</div>
 
 <div *ngIf="!isLoading">
   <label>Equipo 1:
@@ -25,8 +25,6 @@
 
   <br><br>
   <button (click)="playMatch()" [disabled]="isMatchPlayed || penaltyVisible">Jugar Partido</button>
-
-  <h3>Resultado</h3>
 
   <div style="display: flex; justify-content: center; align-items: center; gap: 48px;">
     <div style="text-align: center;">
