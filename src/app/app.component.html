@@ -1,8 +1,26 @@
 <h1>Simulador de Fútbol</h1>
 <nav>
-  <button (click)="goToHome()">Inicio</button> | 
-  <button (click)="goToTeams()">Equipos</button> | 
-  <button (click)="goToPlay()">Jugar Partido</button>
+  <button 
+    [ngClass]="{ 'active-nav': isActive('/home') }" 
+    [disabled]="isActive('/home')" 
+    (click)="goToHome()">
+    Inicio
+  </button> | 
+
+  <button 
+    [ngClass]="{ 'active-nav': isActive('/teams') }" 
+    [disabled]="isActive('/teams')" 
+    (click)="goToTeams()">
+    Equipos
+  </button> | 
+
+  <button 
+    [ngClass]="{ 'active-nav': isActive('/play-match') }" 
+    [disabled]="isActive('/play-match')" 
+    (click)="goToPlay()">
+    Jugar Partido
+  </button>
 </nav>
+
 <hr>
 <router-outlet></router-outlet>
