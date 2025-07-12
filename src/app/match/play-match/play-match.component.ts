@@ -65,7 +65,11 @@ export class PlayMatchComponent implements OnInit {
     this.isLoading = true;
     this.apiService.getMatchResult(this.selectedTeamA.score, this.selectedTeamB.score).subscribe({
       next: (result) => {
-        this.matchResult = result;
+        this.matchResult = {
+          ...result,
+          penaltiesA: null,
+          penaltiesB: null
+        };
         this.isMatchPlayed = true;
         this.isLoading = false;
       },
@@ -146,6 +150,11 @@ export class PlayMatchComponent implements OnInit {
   endPenalties() {
     this.penaltyShootoutActive = false;
     this.isPenaltyInProgress = false;
+
+    if (this.penaltyWinner && this.matchResult) {
+      this.matchResult.penaltiesA = this.penaltyTurns[0].filter(r => r === '✅').length;
+      this.matchResult.penaltiesB = this.penaltyTurns[1].filter(r => r === '✅').length;
+    }
   }
 
   getPenaltySlots(teamIndex: number): ('✅' | '❌' | '⬜')[] {

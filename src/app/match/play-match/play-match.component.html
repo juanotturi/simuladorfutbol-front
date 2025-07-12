@@ -37,7 +37,11 @@
     </div>
 
     <div style="font-size: 32px; font-weight: bold;">
-      {{ matchResult?.goalsTeamA ?? '' }} - {{ matchResult?.goalsTeamB ?? '' }}
+      {{ matchResult?.goalsTeamA }}
+      <span *ngIf="matchResult?.penaltiesA !== null" style="font-size: 16px;">({{ matchResult?.penaltiesA }})</span>
+      -
+      {{ matchResult?.goalsTeamB }}
+      <span *ngIf="matchResult?.penaltiesB !== null" style="font-size: 16px;">({{ matchResult?.penaltiesB }})</span>
     </div>
 
     <div style="text-align: center;">
