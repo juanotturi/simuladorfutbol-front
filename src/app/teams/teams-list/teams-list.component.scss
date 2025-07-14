@@ -1,14 +1,4 @@
-.team-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 4px;
-}
-
-.flag-icon {
-  width: 30px;
-  margin-right: 8px;
-}
-
+/* Tabs */
 .tabs button {
   margin-right: 8px;
   padding: 8px 16px;
@@ -22,12 +12,34 @@
   font-weight: bold;
 }
 
+/* Filtros */
 .filters {
   margin-top: 16px;
 }
 
-.team-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 8px;
+/* Tabla de equipos */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+table th,
+table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+table th {
+  background-color: #f0f0f0;
+}
+
+/* Imágenes de bandera/escudo */
+.flag-icon {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
 }

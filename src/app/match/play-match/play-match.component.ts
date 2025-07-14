@@ -18,6 +18,10 @@ export class PlayMatchComponent implements OnInit {
   selectedTeamB?: Team;
   isLoading = false;
   matchResult?: MatchResult;
+  filterAConfLeague: string = '';
+  filterBConfLeague: string = '';
+  searchNameA: string = '';
+  searchNameB: string = '';
 
   placeholderImage = '/assets/placeholder_pelota.png';
   isMatchPlayed = false;
@@ -31,6 +35,7 @@ export class PlayMatchComponent implements OnInit {
   maxPenalties: number = 5;
   isSuddenDeath = false;
   isPenaltyInProgress = false;
+  isMatchFinalized = false;
 
   constructor(private apiService: ApiService) {}
 
@@ -150,6 +155,7 @@ export class PlayMatchComponent implements OnInit {
   endPenalties() {
     this.penaltyShootoutActive = false;
     this.isPenaltyInProgress = false;
+     this.isMatchFinalized = true;
 
     if (this.penaltyWinner && this.matchResult) {
       this.matchResult.penaltiesA = this.penaltyTurns[0].filter(r => r === '✅').length;
@@ -164,7 +170,7 @@ export class PlayMatchComponent implements OnInit {
   }
 
   isInteractionBlocked(): boolean {
-    return this.isMatchPlayed || this.penaltyShootoutActive;
+    return this.isMatchPlayed || this.penaltyShootoutActive || this.isMatchFinalized;
   }
 
   resetMatch() {
@@ -178,5 +184,41 @@ export class PlayMatchComponent implements OnInit {
     this.penaltyWinner = null;
     this.penaltyTurns = [[], []];
     this.isSuddenDeath = false;
+    this.isMatchFinalized = false;
+  }
+
+  get filteredTeamsA(): Team[] {
+    return this.filterTeams(this.filterAConfLeague, this.searchNameA);
+  }
+
+  get filteredTeamsB(): Team[] {
+    return this.filterTeams(this.filterBConfLeague, this.searchNameB);
+  }
+
+  filterTeams(confLeague: string, name: string): Team[] {
+    let result = this.teams;
+
+    if (confLeague) {
+      result = result.filter(t =>
+        t.confederation === confLeague || t.league === confLeague
+      );
+    }
+
+    if (name) {
+      result = result.filter(t =>
+        t.name.toLowerCase().includes(name.toLowerCase())
+      );
+    }
+
+    return result;
+  }
+
+  getConfLeagueOptions(): string[] {
+    const set = new Set<string>();
+    this.teams.forEach(t => {
+      if (t.confederation) set.add(t.confederation);
+      if (t.league) set.add(t.league);
+    });
+    return Array.from(set).sort();
   }
 }
