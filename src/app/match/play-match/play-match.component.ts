@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { Team } from '../../models/team.model';
 import { MatchResult } from '../../models/match-result.model';
+import { LEAGUES } from '../../data/leagues';
+import { CONFEDERATIONS } from '../../data/confederations';
 
 @Component({
   selector: 'app-play-match',
@@ -39,8 +41,8 @@ export class PlayMatchComponent implements OnInit {
   filterBConfLeague: string | null = null;
   selectedTeamB?: Team;
 
-  confederations: string[] = ['AFC', 'CAF', 'CONCACAF', 'CONMEBOL', 'OFC', 'UEFA'];
-  leagues: string[] = ['Liga BBVA', 'Serie A', 'Bundesliga', 'Premier League', 'Ligue 1', 'MLS'];
+  confederations = CONFEDERATIONS;
+  leagues = LEAGUES;
 
   constructor(private apiService: ApiService) {}
 
@@ -189,7 +191,7 @@ export class PlayMatchComponent implements OnInit {
   }
 
   isInteractionBlocked(): boolean {
-    return this.isMatchPlayed || this.penaltyShootoutActive;
+    return this.isMatchPlayed || this.penaltyShootoutActive || this.penaltyWinner != null;
   }
 
   resetMatch() {

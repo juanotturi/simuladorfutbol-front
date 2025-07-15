@@ -14,6 +14,14 @@
   gap: 16px;
   flex: 1 1 240px;
   max-width: 260px;
+  height: 100%;
+}
+
+.selectors-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 /* Contenedor de cada equipo */
@@ -77,15 +85,18 @@
   min-width: 280px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .result-display {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
+  flex-wrap: wrap;
   gap: 32px;
   margin-bottom: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .team-display {
@@ -96,10 +107,13 @@
 .flag-large {
   width: 100px;
   height: 66px;
+  max-width: 100px;
+  max-height: 66px;
   object-fit: contain;
   border: 1px solid #ccc;
   box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
   margin-bottom: 4px;
+  flex-shrink: 0;
 }
 
 .score-display {
@@ -138,10 +152,67 @@
 /* Penales */
 .penalty-grids {
   display: flex;
-  justify-content: center;
-  gap: 24px;
+  flex-direction: column;
+  gap: 16px;
   margin-top: 12px;
+  align-items: center;
+}
+
+.penalty-section {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  margin-top: 24px;
   flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.penalty-box {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  max-width: 300px;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.penalty-row-display {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 48px;
+  flex-wrap: wrap;
+}
+
+.penalty-team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.penalty-row {
+  display: flex;
+  gap: 4px;
+  font-size: 20px;
+}
+
+.penalty-info {
+  text-align: center;
+}
+
+.penalty-box,
+.winner-box {
+  padding: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-sizing: border-box;
 }
 
 .penalty-row {
@@ -171,4 +242,29 @@
   .score-display {
     font-size: 24px;
   }
+}
+
+.result-buttons-inline {
+  display: flex;
+  gap: 8px;
+}
+
+.result-buttons-inline button {
+  padding: 6px 12px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  background-color: #2196F3;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.result-buttons-inline button:hover:enabled {
+  background-color: #1976D2;
+}
+
+.result-buttons-inline button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
