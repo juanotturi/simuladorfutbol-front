@@ -1,94 +1,156 @@
+/* Layout general */
+.match-container {
+  display: flex;
+  gap: 24px;
+  margin-top: 16px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+/* Columna izquierda: filtros y botón */
+.selectors-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1 1 240px;
+  max-width: 260px;
+}
+
+/* Contenedor de cada equipo */
+.team-selector {
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.team-selector h4 {
+  margin-top: 4px;
+  margin-bottom: 4px;
+  font-size: 16px;
+}
+
+.team-selector label {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+}
+
+.team-selector select,
+.team-selector input {
+  width: 100%;
+  padding: 4px 6px;
+  margin-top: 2px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Botón Jugar Partido */
+.selectors-column > button {
+  padding: 8px 16px;
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  font-size: 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.selectors-column > button:hover:enabled {
+  background-color: #45a049;
+}
+
+.selectors-column > button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Columna derecha: resultado */
+.result-column {
+  flex: 2 1 300px;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.result-display {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+  margin-bottom: 12px;
+}
+
+.team-display {
+  text-align: center;
+  font-size: 14px;
+}
+
 .flag-large {
-  width: 90px;
-  height: 60px;
+  width: 100px;
+  height: 66px;
   object-fit: contain;
   border: 1px solid #ccc;
   box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
   margin-bottom: 4px;
 }
 
-/* Container general para match */
-.match-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 12px;
-}
-
-/* Columna de selectors */
-.selectors-column {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  flex: 1 1 220px;
-  max-width: 220px;
-}
-
-/* Formulario individual */
-.team-selector {
-  padding: 6px;
-  border-radius: 5px;
-  font-size: 13px;
-}
-
-.team-selector label {
-  margin-bottom: 4px;
-}
-
-.team-selector input,
-.team-selector select {
-  max-width: 180px;
-  padding: 4px;
-  margin-top: 2px;
-  font-size: 13px;
-}
-
-/* Columna de resultado */
-.result-column {
-  flex: 2 1 280px;
-  min-width: 250px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.result-column .team-display {
-  text-align: center;
-  font-size: 13px;
-}
-
 .score-display {
-  font-size: 22px;
+  font-size: 28px;
   font-weight: bold;
+  text-align: center;
 }
 
+/* Botones Reiniciar / Penales */
 .result-buttons {
-  margin-top: 10px;
+  margin-top: 12px;
   text-align: center;
 }
 
 .result-buttons button {
-  margin: 3px;
-  padding: 5px 10px;
-  font-size: 13px;
+  margin: 4px;
+  padding: 6px 12px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  background-color: #2196F3;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.result-buttons button:hover:enabled {
+  background-color: #1976D2;
+}
+
+.result-buttons button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 
 /* Penales */
 .penalty-grids {
   display: flex;
   justify-content: center;
-  gap: 16px;
-  margin-top: 10px;
+  gap: 24px;
+  margin-top: 12px;
+  flex-wrap: wrap;
 }
 
 .penalty-row {
   display: flex;
-  gap: 3px;
-  font-size: 18px;
+  gap: 4px;
+  font-size: 20px;
 }
 
-/* Responsive para mobile */
+/* Responsive */
 @media (max-width: 768px) {
   .match-container {
     flex-direction: column;
@@ -100,22 +162,13 @@
     max-width: 100%;
     flex: 1 1 auto;
   }
-}
 
-.play-button {
-  width: 100%;
-  max-width: 180px;
-  padding: 6px;
-  font-size: 14px;
-  margin: 0 auto 12px;
-  display: block;
-}
+  .result-display {
+    flex-direction: column;
+    gap: 16px;
+  }
 
-.play-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-.play-button:hover:not(:disabled) {
-  background-color: #45a049;
+  .score-display {
+    font-size: 24px;
+  }
 }

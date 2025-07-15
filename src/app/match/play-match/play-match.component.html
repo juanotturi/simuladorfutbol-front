@@ -1,24 +1,34 @@
+<h3>Jugar Partido</h3>
+
 <div *ngIf="isLoading">Cargando partido...</div>
 
 <div *ngIf="!isLoading" class="match-container">
   <div class="selectors-column">
-    <button class="play-button" (click)="playMatch()" [disabled]="isInteractionBlocked()">Jugar Partido</button>
     <div class="team-selector">
       <h4>Equipo 1</h4>
+
       <label>
-        Confederación/Liga:
-        <select [(ngModel)]="filterAConfLeague" [disabled]="isInteractionBlocked()">
-          <option value="">Todas</option>
-          <option *ngFor="let conf of getConfLeagueOptions()" [value]="conf">{{ conf }}</option>
+        Tipo:
+        <select [(ngModel)]="typeA" [disabled]="isInteractionBlocked()">
+          <option [ngValue]="null">-- Tipo --</option>
+          <option value="SELECCION">Selección</option>
+          <option value="CLUB">Club</option>
         </select>
       </label>
+
       <label>
-        Buscar nombre:
-        <input type="text" [(ngModel)]="searchNameA" [disabled]="isInteractionBlocked()" placeholder="Ingrese el equipo">
+        Confederación/Liga:
+        <select [(ngModel)]="filterAConfLeague"
+                [disabled]="!typeA || isInteractionBlocked()">
+          <option [ngValue]="null">-- Confederación/Liga --</option>
+          <option *ngFor="let option of getSecondLevelOptions(typeA)" [value]="option">{{ option }}</option>
+        </select>
       </label>
+
       <label>
         Equipo:
-        <select [(ngModel)]="selectedTeamA" [disabled]="isInteractionBlocked()">
+        <select [(ngModel)]="selectedTeamA"
+                [disabled]="!filterAConfLeague || isInteractionBlocked()">
           <option [ngValue]="null">-- Selecciona un equipo --</option>
           <option *ngFor="let team of filteredTeamsA" [ngValue]="team">
             {{ team.name }} ({{ team.score }})
@@ -29,20 +39,29 @@
 
     <div class="team-selector">
       <h4>Equipo 2</h4>
+
       <label>
-        Confederación/Liga:
-        <select [(ngModel)]="filterBConfLeague" [disabled]="isInteractionBlocked()">
-          <option value="">Todas</option>
-          <option *ngFor="let conf of getConfLeagueOptions()" [value]="conf">{{ conf }}</option>
+        Tipo:
+        <select [(ngModel)]="typeB" [disabled]="isInteractionBlocked()">
+          <option [ngValue]="null">-- Tipo --</option>
+          <option value="SELECCION">Selección</option>
+          <option value="CLUB">Club</option>
         </select>
       </label>
+
       <label>
-        Buscar nombre:
-        <input type="text" [(ngModel)]="searchNameB" [disabled]="isInteractionBlocked()" placeholder="Ingrese el equipo">
+        Confederación/Liga:
+        <select [(ngModel)]="filterBConfLeague"
+                [disabled]="!typeB || isInteractionBlocked()">
+          <option [ngValue]="null">-- Confederación/Liga --</option>
+          <option *ngFor="let option of getSecondLevelOptions(typeB)" [value]="option">{{ option }}</option>
+        </select>
       </label>
+
       <label>
         Equipo:
-        <select [(ngModel)]="selectedTeamB" [disabled]="isInteractionBlocked()">
+        <select [(ngModel)]="selectedTeamB"
+                [disabled]="!filterBConfLeague || isInteractionBlocked()">
           <option [ngValue]="null">-- Selecciona un equipo --</option>
           <option *ngFor="let team of filteredTeamsB" [ngValue]="team">
             {{ team.name }} ({{ team.score }})
@@ -50,6 +69,8 @@
         </select>
       </label>
     </div>
+
+    <button (click)="playMatch()" [disabled]="isInteractionBlocked()">Jugar Partido</button>
   </div>
 
   <div class="result-column">
@@ -58,13 +79,19 @@
         <img [src]="selectedTeamA?.image || placeholderImage" alt="{{ selectedTeamA?.name || 'Equipo 1' }}" class="flag-large">
         <div>{{ selectedTeamA?.name || 'Equipo 1' }}</div>
       </div>
+
       <div class="score-display">
         {{ matchResult?.goalsTeamA }}
-        <span *ngIf="matchResult?.penaltiesA !== null">({{ matchResult?.penaltiesA }})</span>
+        <span *ngIf="matchResult?.penaltiesA != null && matchResult?.penaltiesB != null">
+          ({{ matchResult?.penaltiesA }})
+        </span>
         -
         {{ matchResult?.goalsTeamB }}
-        <span *ngIf="matchResult?.penaltiesB !== null">({{ matchResult?.penaltiesB }})</span>
+        <span *ngIf="matchResult?.penaltiesA != null && matchResult?.penaltiesB != null">
+          ({{ matchResult?.penaltiesB }})
+        </span>
       </div>
+
       <div class="team-display">
         <img [src]="selectedTeamB?.image || placeholderImage" alt="{{ selectedTeamB?.name || 'Equipo 2' }}" class="flag-large">
         <div>{{ selectedTeamB?.name || 'Equipo 2' }}</div>
@@ -97,10 +124,11 @@
         </div>
       </div>
     </div>
-
   </div>
+
   <div *ngIf="penaltyWinner">
     <h3>¡Ganador por penales!</h3>
     <p>{{ penaltyWinner.name }}</p>
   </div>
 </div>
+

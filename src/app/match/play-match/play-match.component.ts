@@ -14,19 +14,13 @@ import { MatchResult } from '../../models/match-result.model';
 })
 export class PlayMatchComponent implements OnInit {
   teams: Team[] = [];
-  selectedTeamA?: Team;
-  selectedTeamB?: Team;
   isLoading = false;
   matchResult?: MatchResult;
-  filterAConfLeague: string = '';
-  filterBConfLeague: string = '';
-  searchNameA: string = '';
-  searchNameB: string = '';
 
   placeholderImage = '/assets/placeholder_pelota.png';
   isMatchPlayed = false;
 
-  // Control de penales
+  // Penales
   penaltyShootoutActive = false;
   penaltyVisible = false;
   penaltyTurns: ('✅' | '❌')[][] = [[], []];
@@ -35,7 +29,18 @@ export class PlayMatchComponent implements OnInit {
   maxPenalties: number = 5;
   isSuddenDeath = false;
   isPenaltyInProgress = false;
-  isMatchFinalized = false;
+
+  // Filtros y selección de equipos A y B
+  typeA: 'SELECCION' | 'CLUB' | null = null;
+  filterAConfLeague: string | null = null;
+  selectedTeamA?: Team;
+
+  typeB: 'SELECCION' | 'CLUB' | null = null;
+  filterBConfLeague: string | null = null;
+  selectedTeamB?: Team;
+
+  confederations: string[] = ['AFC', 'CAF', 'CONCACAF', 'CONMEBOL', 'OFC', 'UEFA'];
+  leagues: string[] = ['Liga BBVA', 'Serie A', 'Bundesliga', 'Premier League', 'Ligue 1', 'MLS'];
 
   constructor(private apiService: ApiService) {}
 
@@ -56,12 +61,30 @@ export class PlayMatchComponent implements OnInit {
     });
   }
 
+  // Filtros dependientes
+  getSecondLevelOptions(type: 'SELECCION' | 'CLUB' | null): string[] {
+    if (type === 'SELECCION') return this.confederations;
+    if (type === 'CLUB') return this.leagues;
+    return [];
+  }
+
+  get filteredTeamsA(): Team[] {
+    return this.teams
+      .filter(t => this.typeA === 'SELECCION' ? !t.league : !!t.league)
+      .filter(t => this.filterAConfLeague ? (t.confederation === this.filterAConfLeague || t.league === this.filterAConfLeague) : true);
+  }
+
+  get filteredTeamsB(): Team[] {
+    return this.teams
+      .filter(t => this.typeB === 'SELECCION' ? !t.league : !!t.league)
+      .filter(t => this.filterBConfLeague ? (t.confederation === this.filterBConfLeague || t.league === this.filterBConfLeague) : true);
+  }
+
   playMatch() {
     if (!this.selectedTeamA || !this.selectedTeamB) {
       alert('Selecciona ambos equipos');
       return;
     }
-
     if (this.selectedTeamA === this.selectedTeamB) {
       alert('No se puede repetir el mismo equipo');
       return;
@@ -70,11 +93,7 @@ export class PlayMatchComponent implements OnInit {
     this.isLoading = true;
     this.apiService.getMatchResult(this.selectedTeamA.score, this.selectedTeamB.score).subscribe({
       next: (result) => {
-        this.matchResult = {
-          ...result,
-          penaltiesA: null,
-          penaltiesB: null
-        };
+        this.matchResult = result;
         this.isMatchPlayed = true;
         this.isLoading = false;
       },
@@ -147,6 +166,7 @@ export class PlayMatchComponent implements OnInit {
         if (lastA !== lastB) {
           this.penaltyWinner = lastA === '✅' ? this.selectedTeamA! : this.selectedTeamB!;
           this.penaltyShootoutActive = false;
+          this.isPenaltyInProgress = false;
         }
       }
     }
@@ -155,7 +175,6 @@ export class PlayMatchComponent implements OnInit {
   endPenalties() {
     this.penaltyShootoutActive = false;
     this.isPenaltyInProgress = false;
-     this.isMatchFinalized = true;
 
     if (this.penaltyWinner && this.matchResult) {
       this.matchResult.penaltiesA = this.penaltyTurns[0].filter(r => r === '✅').length;
@@ -170,12 +189,17 @@ export class PlayMatchComponent implements OnInit {
   }
 
   isInteractionBlocked(): boolean {
-    return this.isMatchPlayed || this.penaltyShootoutActive || this.isMatchFinalized;
+    return this.isMatchPlayed || this.penaltyShootoutActive;
   }
 
   resetMatch() {
     this.selectedTeamA = undefined;
     this.selectedTeamB = undefined;
+    this.typeA = null;
+    this.typeB = null;
+    this.filterAConfLeague = null;
+    this.filterBConfLeague = null;
+
     this.matchResult = undefined;
     this.isMatchPlayed = false;
     this.penaltyShootoutActive = false;
@@ -184,41 +208,5 @@ export class PlayMatchComponent implements OnInit {
     this.penaltyWinner = null;
     this.penaltyTurns = [[], []];
     this.isSuddenDeath = false;
-    this.isMatchFinalized = false;
-  }
-
-  get filteredTeamsA(): Team[] {
-    return this.filterTeams(this.filterAConfLeague, this.searchNameA);
-  }
-
-  get filteredTeamsB(): Team[] {
-    return this.filterTeams(this.filterBConfLeague, this.searchNameB);
-  }
-
-  filterTeams(confLeague: string, name: string): Team[] {
-    let result = this.teams;
-
-    if (confLeague) {
-      result = result.filter(t =>
-        t.confederation === confLeague || t.league === confLeague
-      );
-    }
-
-    if (name) {
-      result = result.filter(t =>
-        t.name.toLowerCase().includes(name.toLowerCase())
-      );
-    }
-
-    return result;
-  }
-
-  getConfLeagueOptions(): string[] {
-    const set = new Set<string>();
-    this.teams.forEach(t => {
-      if (t.confederation) set.add(t.confederation);
-      if (t.league) set.add(t.league);
-    });
-    return Array.from(set).sort();
   }
 }
