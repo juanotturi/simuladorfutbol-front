@@ -108,15 +108,17 @@
       </div>
     </div>
 
-    <div *ngIf="penaltyVisible" class="penalty-box">
-      <h3>Definición por penales</h3>
-      <p>Turno: {{ currentShooter === 0 ? selectedTeamA?.name : selectedTeamB?.name }}</p>
-      <button (click)="takePenalty()" [disabled]="penaltyWinner">Patear penal</button>
-    </div>
+    <div *ngIf="penaltyVisible || penaltyWinner" class="penalty-section">
+      <div *ngIf="penaltyVisible" class="penalty-box">
+        <h3>Definición por penales</h3>
+        <p>Turno: {{ currentShooter === 0 ? selectedTeamA?.name : selectedTeamB?.name }}</p>
+        <button (click)="takePenalty()" [disabled]="penaltyWinner">Patear penal</button>
+      </div>
 
-    <div *ngIf="penaltyWinner" class="winner-box">
-      <h3>¡Ganador por penales!</h3>
-      <p>{{ penaltyWinner.name }}</p>
+      <div *ngIf="penaltyWinner" class="winner-box">
+        <h3>¡Ganador por penales!</h3>
+        <p>{{ penaltyWinner.name }}</p>
+      </div>
     </div>
   </div>
 </div>

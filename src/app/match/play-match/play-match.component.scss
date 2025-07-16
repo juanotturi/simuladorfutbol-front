@@ -105,10 +105,10 @@
 }
 
 .flag-large {
-  width: 100px;
-  height: 66px;
-  max-width: 100px;
-  max-height: 66px;
+  width: 140px;
+  height: 92px;
+  max-width: 140px;
+  max-height: 92px;
   object-fit: contain;
   border: 1px solid #ccc;
   box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
@@ -163,7 +163,7 @@
   flex-direction: row;
   gap: 24px;
   margin-top: 24px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: flex-start;
 }
 
@@ -213,6 +213,14 @@
   border-radius: 8px;
   background-color: #f9f9f9;
   box-sizing: border-box;
+  max-width: 400px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+  min-height: 150px;
+  justify-content: center;
 }
 
 .penalty-row {

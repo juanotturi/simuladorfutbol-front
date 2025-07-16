@@ -6,5 +6,6 @@ export const LEAGUES: string[] = [
   'Ligue 1 (FRA 1)',
   'MLS (USA 1)',
   'Brasileirao (BRA 1)',
-  'Liga Profesional Argentina (ARG 1)'
+  'Liga Profesional Argentina (ARG 1)',
+  'Primera Nacional (ARG 2)'
 ];

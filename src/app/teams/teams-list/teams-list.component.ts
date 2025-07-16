@@ -5,6 +5,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { NavigationService } from '../../services/navigation.service';
+import { CONFEDERATIONS } from '../../data/confederations';
+import { LEAGUES } from '../../data/leagues';
 
 @Component({
   selector: 'app-teams-list',
@@ -22,11 +24,13 @@ export class TeamsListComponent implements OnInit, OnDestroy {
   selectedTab: 'SELECCIONES' | 'CLUBES' | '' = '';
 
   selectedConfederation: string = '';
+  selectedLeague: string = '';
   searchName: string = '';
+  sortField: 'name' | 'score' = 'name';
+  sortDirection: 'asc' | 'desc' = 'asc';
 
-  confederations: string[] = [
-    'AFC', 'CAF', 'CONCACAF', 'CONMEBOL', 'OFC', 'UEFA'
-  ];
+  confederations = CONFEDERATIONS;
+  leagues = LEAGUES;
 
   constructor(
     private apiService: ApiService,
@@ -68,10 +72,25 @@ export class TeamsListComponent implements OnInit, OnDestroy {
       subset = subset.filter(t => t.confederation === this.selectedConfederation);
     }
 
+    if (this.selectedTab === 'CLUBES' && this.selectedLeague) {
+      subset = subset.filter(t => t.league === this.selectedLeague);
+    }
+
     if (this.searchName) {
       subset = subset.filter(t =>
         t.name.toLowerCase().includes(this.searchName.toLowerCase())
       );
+    }
+
+    subset = subset.slice();
+
+    if (this.sortField === 'name') {
+      subset.sort((a, b) => {
+        const aName = a.name.toLowerCase();
+        const bName = b.name.toLowerCase();
+        const comparison = aName.localeCompare(bName, undefined, { sensitivity: 'base' });
+        return this.sortDirection === 'asc' ? comparison : -comparison;
+      });
     }
 
     return subset;

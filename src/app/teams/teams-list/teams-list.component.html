@@ -8,21 +8,47 @@
   </button>
 </div>
 
-<div *ngIf="selectedTab">
-  <h3>Filtros</h3>
-  <div class="filters">
-    <label *ngIf="selectedTab === 'SELECCIONES'">
-      Confederación:
-      <select [(ngModel)]="selectedConfederation">
-        <option value="">Todas</option>
-        <option *ngFor="let conf of confederations" [value]="conf">{{ conf }}</option>
-      </select>
-    </label>
+<div class="filters">
+  <div *ngIf="selectedTab">
+    <h3>Filtros</h3>
+    <div class="filters">
+      <label *ngIf="selectedTab === 'SELECCIONES'">
+        Confederación:
+        <select [(ngModel)]="selectedConfederation">
+          <option value="">Todas</option>
+          <option *ngFor="let conf of confederations" [value]="conf">{{ conf }}</option>
+        </select>
+      </label>
 
-    <label>
-      Buscar por nombre:
-      <input type="text" [(ngModel)]="searchName" placeholder="Ingresá el nombre">
-    </label>
+      <label *ngIf="selectedTab === 'CLUBES'">
+        Liga:
+        <select [(ngModel)]="selectedLeague">
+          <option value="">Todas</option>
+          <option *ngFor="let league of leagues" [value]="league">{{ league }}</option>
+        </select>
+      </label>
+
+      <label>
+        Buscar por nombre:
+        <input type="text" [(ngModel)]="searchName" placeholder="Ingresá el nombre">
+      </label>
+
+      <label>
+        Ordenar por:
+        <select [(ngModel)]="sortField">
+          <option value="name">Nombre</option>
+          <option value="score">Score</option>
+        </select>
+      </label>
+
+      <label>
+        Dirección:
+        <select [(ngModel)]="sortDirection">
+          <option value="asc">Ascendente</option>
+          <option value="desc">Descendente</option>
+        </select>
+      </label>
+    </div>
   </div>
 </div>
 
