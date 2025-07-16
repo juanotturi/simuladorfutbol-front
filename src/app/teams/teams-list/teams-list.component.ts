@@ -91,6 +91,12 @@ export class TeamsListComponent implements OnInit, OnDestroy {
         const comparison = aName.localeCompare(bName, undefined, { sensitivity: 'base' });
         return this.sortDirection === 'asc' ? comparison : -comparison;
       });
+    } else if (this.sortField === 'score') {
+      subset.sort((a, b) => {
+        return this.sortDirection === 'asc'
+          ? a.score - b.score
+          : b.score - a.score;
+      });
     }
 
     return subset;
