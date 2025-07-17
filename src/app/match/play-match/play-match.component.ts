@@ -4,8 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { Team } from '../../models/team.model';
 import { MatchResult } from '../../models/match-result.model';
-import { LEAGUES } from '../../data/leagues';
-import { CONFEDERATIONS } from '../../data/confederations';
 
 @Component({
   selector: 'app-play-match',
@@ -41,8 +39,8 @@ export class PlayMatchComponent implements OnInit {
   filterBConfLeague: string | null = null;
   selectedTeamB?: Team;
 
-  confederations = CONFEDERATIONS;
-  leagues = LEAGUES;
+  uniqueConfederations: string[] = [];
+  uniqueLeagues: string[] = [];
 
   constructor(private apiService: ApiService) {}
 
@@ -55,18 +53,48 @@ export class PlayMatchComponent implements OnInit {
     this.apiService.getTeams().subscribe({
       next: (data) => {
         this.teams = data;
+        this.extractUniqueFilters(data);
         this.isLoading = false;
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error loading teams', err);
         this.isLoading = false;
       }
     });
   }
 
-  // Filtros dependientes
+  extractUniqueFilters(teams: Team[]) {
+    const confSet = new Set<string>();
+    const leagueSet = new Set<string>();
+
+    teams.forEach(team => {
+      if (team.confederation) {
+        confSet.add(team.confederation);
+      }
+      if (team.league) {
+        leagueSet.add(team.league);
+      }
+    });
+
+    this.uniqueConfederations = Array.from(confSet).sort();
+
+    this.uniqueLeagues = Array.from(leagueSet).sort((a, b) => {
+      const codeA = a.match(/\((.*?)\)/)?.[1] ?? '';
+      const codeB = b.match(/\((.*?)\)/)?.[1] ?? '';
+
+      const [countryA, levelA] = codeA.split(' ');
+      const [countryB, levelB] = codeB.split(' ');
+
+      if (countryA < countryB) return -1;
+      if (countryA > countryB) return 1;
+
+      return parseInt(levelA) - parseInt(levelB);
+    });
+  }
+
   getSecondLevelOptions(type: 'SELECCION' | 'CLUB' | null): string[] {
-    if (type === 'SELECCION') return this.confederations;
-    if (type === 'CLUB') return this.leagues;
+    if (type === 'SELECCION') return this.uniqueConfederations;
+    if (type === 'CLUB') return this.uniqueLeagues;
     return [];
   }
 

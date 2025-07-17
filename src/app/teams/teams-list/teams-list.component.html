@@ -16,7 +16,7 @@
         Confederación:
         <select [(ngModel)]="selectedConfederation">
           <option value="">Todas</option>
-          <option *ngFor="let conf of confederations" [value]="conf">{{ conf }}</option>
+          <option *ngFor="let conf of uniqueConfederations" [value]="conf">{{ conf }}</option>
         </select>
       </label>
 
@@ -24,7 +24,7 @@
         Liga:
         <select [(ngModel)]="selectedLeague">
           <option value="">Todas</option>
-          <option *ngFor="let league of leagues" [value]="league">{{ league }}</option>
+          <option *ngFor="let league of uniqueLeagues" [value]="league">{{ league }}</option>
         </select>
       </label>
 

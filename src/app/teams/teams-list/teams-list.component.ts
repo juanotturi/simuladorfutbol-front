@@ -5,8 +5,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { NavigationService } from '../../services/navigation.service';
-import { CONFEDERATIONS } from '../../data/confederations';
-import { LEAGUES } from '../../data/leagues';
 
 @Component({
   selector: 'app-teams-list',
@@ -28,9 +26,8 @@ export class TeamsListComponent implements OnInit, OnDestroy {
   searchName: string = '';
   sortField: 'name' | 'score' = 'name';
   sortDirection: 'asc' | 'desc' = 'asc';
-
-  confederations = CONFEDERATIONS;
-  leagues = LEAGUES;
+  uniqueConfederations: string[] = [];
+  uniqueLeagues: string[] = [];
 
   constructor(
     private apiService: ApiService,
@@ -50,12 +47,42 @@ export class TeamsListComponent implements OnInit, OnDestroy {
     this.apiService.getTeams().subscribe({
       next: (data) => {
         this.teams = data;
+        this.extractUniqueFilters(data); // 👈 Nueva línea
         this.isLoading = false;
       },
       error: (err) => {
         console.error('Error loading teams', err);
         this.isLoading = false;
       }
+    });
+  }
+
+  extractUniqueFilters(teams: Team[]) {
+    const confSet = new Set<string>();
+    const leagueSet = new Set<string>();
+
+    teams.forEach(team => {
+      if (team.confederation) {
+        confSet.add(team.confederation);
+      }
+      if (team.league) {
+        leagueSet.add(team.league);
+      }
+    });
+
+    this.uniqueConfederations = Array.from(confSet).sort();
+
+    this.uniqueLeagues = Array.from(leagueSet).sort((a, b) => {
+      const codeA = a.match(/\((.*?)\)/)?.[1] ?? '';
+      const codeB = b.match(/\((.*?)\)/)?.[1] ?? '';
+
+      const [countryA, levelA] = codeA.split(' ');
+      const [countryB, levelB] = codeB.split(' ');
+
+      if (countryA < countryB) return -1;
+      if (countryA > countryB) return 1;
+
+      return parseInt(levelA) - parseInt(levelB);
     });
   }
 
