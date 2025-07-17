@@ -42,6 +42,19 @@ export class PlayMatchComponent implements OnInit {
   uniqueConfederations: string[] = [];
   uniqueLeagues: string[] = [];
 
+  durations = [
+    { label: 'Instantáneo', value: 0 },
+    { label: '30 segundos', value: 30_000 },
+    { label: '1 minuto', value: 60_000 },
+    { label: '5 minutos', value: 300_000 },
+    { label: '10 minutos', value: 600_000 }
+  ];
+  selectedDuration = 0;
+
+  matchClock = 0;
+  matchInterval: any;
+  matchTimer: any = null;
+
   constructor(private apiService: ApiService) {}
 
   ngOnInit(): void {
@@ -120,8 +133,35 @@ export class PlayMatchComponent implements OnInit {
       return;
     }
 
+    this.isMatchPlayed = false;
+    this.matchResult = undefined;
+    this.matchClock = 0;
+
+    const matchDurationSeconds = this.getMatchDurationInSeconds();
+    if (matchDurationSeconds === 0) {
+      this.fetchMatchResult();
+    } else {
+      const intervalTime = matchDurationSeconds * 1000 / 90;
+      let minute = 0;
+      this.matchTimer = setInterval(() => {
+        minute++;
+        this.matchClock = minute;
+
+        if (minute >= 90) {
+          clearInterval(this.matchTimer);
+          this.fetchMatchResult();
+        }
+      }, intervalTime);
+    }
+  }
+
+  getMatchDurationInSeconds(): number {
+    return this.selectedDuration / 1000;
+  }
+
+  fetchMatchResult() {
     this.isLoading = true;
-    this.apiService.getMatchResult(this.selectedTeamA.score, this.selectedTeamB.score).subscribe({
+    this.apiService.getMatchResult(this.selectedTeamA!.score, this.selectedTeamB!.score).subscribe({
       next: (result) => {
         this.matchResult = result;
         this.isMatchPlayed = true;

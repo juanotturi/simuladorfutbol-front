@@ -68,6 +68,15 @@
           </select>
         </label>
       </div>
+      <label>
+        Duración del partido:
+        <select [(ngModel)]="selectedDuration" [disabled]="isInteractionBlocked()">
+          <option *ngFor="let d of durations" [value]="d.value">{{ d.label }}</option>
+        </select>
+      </label>
+      <div *ngIf="selectedDuration > 0 && matchClock < 90">
+        Minuto: {{ matchClock }}
+      </div>
       <button (click)="playMatch()" [disabled]="isInteractionBlocked()">Jugar Partido</button>
     </div>
   </div>
