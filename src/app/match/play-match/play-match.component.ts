@@ -16,11 +16,16 @@ export class PlayMatchComponent implements OnInit {
   teams: Team[] = [];
   isLoading = false;
   matchResult?: MatchResult;
-
-  placeholderImage = '/assets/placeholder_pelota.png';
+  goalTimelineA: number[] = [];
+  goalTimelineB: number[] = [];
+  liveGoalsA = 0;
+  liveGoalsB = 0;
+  goalLog: string[] = [];
+  isMatchInProgress = false;
   isMatchPlayed = false;
 
-  // Penales
+  placeholderImage = '/assets/placeholder_pelota.png';
+
   penaltyShootoutActive = false;
   penaltyVisible = false;
   penaltyTurns: ('✅' | '❌')[][] = [[], []];
@@ -30,7 +35,6 @@ export class PlayMatchComponent implements OnInit {
   isSuddenDeath = false;
   isPenaltyInProgress = false;
 
-  // Filtros y selección de equipos A y B
   typeA: 'SELECCION' | 'CLUB' | null = null;
   filterAConfLeague: string | null = null;
   selectedTeamA?: Team;
@@ -133,26 +137,89 @@ export class PlayMatchComponent implements OnInit {
       return;
     }
 
+    this.liveGoalsA = 0;
+    this.liveGoalsB = 0;
     this.isMatchPlayed = false;
     this.matchResult = undefined;
     this.matchClock = 0;
+    this.isMatchInProgress = true;
 
-    const matchDurationSeconds = this.getMatchDurationInSeconds();
-    if (matchDurationSeconds === 0) {
-      this.fetchMatchResult();
-    } else {
-      const intervalTime = matchDurationSeconds * 1000 / 90;
-      let minute = 0;
-      this.matchTimer = setInterval(() => {
-        minute++;
-        this.matchClock = minute;
+    this.apiService.getMatchResult(this.selectedTeamA.score, this.selectedTeamB.score).subscribe({
+      next: (result) => {
+        this.matchResult = result;
+        this.generateGoalTimeline();
+        this.startMatchClock();
+      },
+      error: () => {
+        this.isLoading = false;
+      }
+    });
+  }
 
-        if (minute >= 90) {
-          clearInterval(this.matchTimer);
-          this.fetchMatchResult();
-        }
-      }, intervalTime);
+  generateGoalTimeline() {
+    const goalsA = this.matchResult?.goalsTeamA ?? 0;
+    const goalsB = this.matchResult?.goalsTeamB ?? 0;
+    const totalGoals = goalsA + goalsB;
+
+    if (totalGoals === 0) {
+      this.goalTimelineA = [];
+      this.goalTimelineB = [];
+      return;
     }
+
+    const minSeparation = 1;
+    const availableMinutes = new Set<number>();
+
+    for (let i = 1; i <= 90; i++) {
+      availableMinutes.add(i);
+    }
+
+    const goalMinutes: number[] = [];
+
+    while (goalMinutes.length < totalGoals && availableMinutes.size > 0) {
+      const minutesArray = Array.from(availableMinutes);
+      const randomIndex = Math.floor(Math.random() * minutesArray.length);
+      const candidate = minutesArray[randomIndex];
+
+      goalMinutes.push(candidate);
+
+      for (let i = candidate - minSeparation; i <= candidate + minSeparation; i++) {
+        availableMinutes.delete(i);
+      }
+    }
+
+    goalMinutes.sort((a, b) => a - b);
+
+    const shuffled = goalMinutes.sort(() => Math.random() - 0.5);
+    this.goalTimelineA = shuffled.slice(0, goalsA).sort((a, b) => a - b);
+    this.goalTimelineB = shuffled.slice(goalsA).sort((a, b) => a - b);
+  }
+
+  startMatchClock() {
+    const duration = this.selectedDuration;
+    const intervalTime = duration / 90;
+    let minute = 0;
+
+    this.matchTimer = setInterval(() => {
+      minute++;
+      this.matchClock = minute;
+      if (this.goalTimelineA.includes(minute)) {
+        this.liveGoalsA++;
+        const log = `⚽ Gol de ${this.selectedTeamA?.name} al ${minute}'`;
+        this.goalLog.push(log);
+        console.log(log);
+      }
+      if (this.goalTimelineB.includes(minute)) {
+        this.liveGoalsB++;
+        const log = `⚽ Gol de ${this.selectedTeamB?.name} al ${minute}'`;
+        this.goalLog.push(log);
+        console.log(log);
+      }
+      if (minute >= 90) {
+        clearInterval(this.matchTimer);
+        this.isMatchPlayed = true;
+      }
+    }, intervalTime);
   }
 
   getMatchDurationInSeconds(): number {
@@ -259,7 +326,7 @@ export class PlayMatchComponent implements OnInit {
   }
 
   isInteractionBlocked(): boolean {
-    return this.isMatchPlayed || this.penaltyShootoutActive || this.penaltyWinner != null;
+    return this.isMatchPlayed || this.penaltyShootoutActive || this.penaltyWinner != null || this.isMatchInProgress;
   }
 
   resetMatch() {
@@ -269,7 +336,8 @@ export class PlayMatchComponent implements OnInit {
     this.typeB = null;
     this.filterAConfLeague = null;
     this.filterBConfLeague = null;
-
+    this.liveGoalsA = 0;
+    this.liveGoalsB = 0;
     this.matchResult = undefined;
     this.isMatchPlayed = false;
     this.penaltyShootoutActive = false;
@@ -278,5 +346,8 @@ export class PlayMatchComponent implements OnInit {
     this.penaltyWinner = null;
     this.penaltyTurns = [[], []];
     this.isSuddenDeath = false;
+    this.matchClock = 0;
+    this.goalLog = [];
+    this.isMatchInProgress = false;
   }
 }

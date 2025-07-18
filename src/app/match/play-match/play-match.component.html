@@ -74,8 +74,10 @@
           <option *ngFor="let d of durations" [value]="d.value">{{ d.label }}</option>
         </select>
       </label>
-      <div *ngIf="selectedDuration > 0 && matchClock < 90">
+      <div *ngIf="matchClock > 0 && matchClock < 91">
         Minuto: {{ matchClock }}
+        <div *ngIf="goalTimelineA.includes(matchClock)">⚽ Gol de {{ selectedTeamA?.name }}</div>
+        <div *ngIf="goalTimelineB.includes(matchClock)">⚽ Gol de {{ selectedTeamB?.name }}</div>
       </div>
       <button (click)="playMatch()" [disabled]="isInteractionBlocked()">Jugar Partido</button>
     </div>
@@ -92,17 +94,16 @@
       </div>
 
       <div class="score-display">
-        {{ matchResult?.goalsTeamA }}
+        {{ isMatchPlayed ? matchResult?.goalsTeamA : liveGoalsA }}
         <span *ngIf="matchResult?.penaltiesA != null && matchResult?.penaltiesB != null">
           ({{ matchResult?.penaltiesA }})
         </span>
         -
-        {{ matchResult?.goalsTeamB }}
+        {{ isMatchPlayed ? matchResult?.goalsTeamB : liveGoalsB }}
         <span *ngIf="matchResult?.penaltiesA != null && matchResult?.penaltiesB != null">
           ({{ matchResult?.penaltiesB }})
         </span>
       </div>
-
       <div class="team-display">
         <img [src]="selectedTeamB?.image || placeholderImage" alt="{{ selectedTeamB?.name || 'Equipo 2' }}" class="flag-large">
         <div>{{ selectedTeamB?.name || 'Equipo 2' }}</div>
@@ -110,10 +111,14 @@
           <span *ngFor="let r of getPenaltySlots(1)">{{ r }}</span>
         </div>
       </div>
-
+      <div class="goal-log">
+        <ul>
+          <li *ngFor="let log of goalLog">{{ log }}</li>
+        </ul>
+      </div>
       <div class="result-buttons-inline">
         <button *ngIf="isMatchPlayed || penaltyWinner" (click)="resetMatch()" [disabled]="penaltyShootoutActive">Reiniciar</button>
-        <button *ngIf="matchResult && matchResult.goalsTeamA === matchResult.goalsTeamB && !penaltyShootoutActive && penaltyWinner == null" (click)="startPenaltyShootout()">Ir a penales</button>
+        <button *ngIf="matchClock === 90 && matchResult && matchResult.goalsTeamA === matchResult.goalsTeamB && !penaltyShootoutActive && penaltyWinner == null" (click)="startPenaltyShootout()">Ir a penales</button>
       </div>
     </div>
 
