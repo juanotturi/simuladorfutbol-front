@@ -17,8 +17,7 @@
 
         <label>
           Confederación/Liga:
-          <select [(ngModel)]="filterAConfLeague"
-                  [disabled]="!typeA || isInteractionBlocked()">
+          <select [(ngModel)]="filterAConfLeague" [disabled]="!typeA || isInteractionBlocked()">
             <option [ngValue]="null">-- Confederación/Liga --</option>
             <option *ngFor="let option of getSecondLevelOptions(typeA)" [value]="option">{{ option }}</option>
           </select>
@@ -26,8 +25,7 @@
 
         <label>
           Equipo:
-          <select [(ngModel)]="selectedTeamA"
-                  [disabled]="!filterAConfLeague || isInteractionBlocked()">
+          <select [(ngModel)]="selectedTeamA" [disabled]="!filterAConfLeague || isInteractionBlocked()">
             <option [ngValue]="null">-- Selecciona un equipo --</option>
             <option *ngFor="let team of filteredTeamsA" [ngValue]="team">
               {{ team.name }} ({{ team.score }})
@@ -50,8 +48,7 @@
 
         <label>
           Confederación/Liga:
-          <select [(ngModel)]="filterBConfLeague"
-                  [disabled]="!typeB || isInteractionBlocked()">
+          <select [(ngModel)]="filterBConfLeague" [disabled]="!typeB || isInteractionBlocked()">
             <option [ngValue]="null">-- Confederación/Liga --</option>
             <option *ngFor="let option of getSecondLevelOptions(typeB)" [value]="option">{{ option }}</option>
           </select>
@@ -59,8 +56,7 @@
 
         <label>
           Equipo:
-          <select [(ngModel)]="selectedTeamB"
-                  [disabled]="!filterBConfLeague || isInteractionBlocked()">
+          <select [(ngModel)]="selectedTeamB" [disabled]="!filterBConfLeague || isInteractionBlocked()">
             <option [ngValue]="null">-- Selecciona un equipo --</option>
             <option *ngFor="let team of filteredTeamsB" [ngValue]="team">
               {{ team.name }} ({{ team.score }})
@@ -74,65 +70,77 @@
           <option *ngFor="let d of durations" [value]="d.value">{{ d.label }}</option>
         </select>
       </label>
-      <div *ngIf="matchClock > 0 && matchClock < 91">
-        Minuto: {{ matchClock }}
-        <div *ngIf="goalTimelineA.includes(matchClock)">⚽ Gol de {{ selectedTeamA?.name }}</div>
-        <div *ngIf="goalTimelineB.includes(matchClock)">⚽ Gol de {{ selectedTeamB?.name }}</div>
-      </div>
       <button (click)="playMatch()" [disabled]="isInteractionBlocked()">Jugar Partido</button>
     </div>
   </div>
 
   <div class="result-column">
-    <div class="result-display">
-      <div class="team-display">
-        <img [src]="selectedTeamA?.image || placeholderImage" alt="{{ selectedTeamA?.name || 'Equipo 1' }}" class="flag-large">
-        <div>{{ selectedTeamA?.name || 'Equipo 1' }}</div>
-        <div *ngIf="penaltyVisible" class="penalty-row">
-          <span *ngFor="let r of getPenaltySlots(0)">{{ r }}</span>
+    <div class="result-block-wrapper">
+      <div class="score-header">
+        <div *ngIf="matchClock > 0 && matchClock < 91" class="match-minute">
+          ⏱ Minuto: {{ matchClock }}
+        </div>
+        <div class="teams-row">
+          <div class="team-display">
+            <img [src]="selectedTeamA?.image || placeholderImage" alt="{{ selectedTeamA?.name || 'Equipo 1' }}"
+              class="flag-large">
+            <div>{{ selectedTeamA?.name || 'Equipo 1' }}</div>
+            <div *ngIf="penaltyVisible" class="penalty-row">
+              <span *ngFor="let r of getPenaltySlots(0)">{{ r }}</span>
+            </div>
+          </div>
+
+          <div class="score-display">
+            <ng-container *ngIf="matchClock > 0 || isMatchPlayed; else placeholderScore">
+              {{ liveGoalsA }}
+              <span *ngIf="matchResult?.penaltiesA != null && matchResult?.penaltiesB != null">
+                ({{ matchResult?.penaltiesA }})
+              </span>
+              -
+              {{ liveGoalsB }}
+              <span *ngIf="matchResult?.penaltiesA != null && matchResult?.penaltiesB != null">
+                ({{ matchResult?.penaltiesB }})
+              </span>
+            </ng-container>
+            <ng-template #placeholderScore>
+              -
+            </ng-template>
+          </div>
+
+          <div class="team-display">
+            <img [src]="selectedTeamB?.image || placeholderImage" alt="{{ selectedTeamB?.name || 'Equipo 2' }}"
+              class="flag-large">
+            <div>{{ selectedTeamB?.name || 'Equipo 2' }}</div>
+            <div *ngIf="penaltyVisible" class="penalty-row">
+              <span *ngFor="let r of getPenaltySlots(1)">{{ r }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="goal-log">
+          <ul>
+            <li *ngFor="let log of goalLog">{{ log }}</li>
+          </ul>
+        </div>
+        <div class="result-buttons-inline">
+          <button *ngIf="isMatchPlayed || penaltyWinner" (click)="resetMatch()"
+            [disabled]="penaltyShootoutActive">Reiniciar</button>
+          <button
+            *ngIf="matchClock === 90 && matchResult && matchResult.goalsTeamA === matchResult.goalsTeamB && !penaltyShootoutActive && penaltyWinner == null"
+            (click)="startPenaltyShootout()">Ir a penales</button>
         </div>
       </div>
 
-      <div class="score-display">
-        {{ isMatchPlayed ? matchResult?.goalsTeamA : liveGoalsA }}
-        <span *ngIf="matchResult?.penaltiesA != null && matchResult?.penaltiesB != null">
-          ({{ matchResult?.penaltiesA }})
-        </span>
-        -
-        {{ isMatchPlayed ? matchResult?.goalsTeamB : liveGoalsB }}
-        <span *ngIf="matchResult?.penaltiesA != null && matchResult?.penaltiesB != null">
-          ({{ matchResult?.penaltiesB }})
-        </span>
-      </div>
-      <div class="team-display">
-        <img [src]="selectedTeamB?.image || placeholderImage" alt="{{ selectedTeamB?.name || 'Equipo 2' }}" class="flag-large">
-        <div>{{ selectedTeamB?.name || 'Equipo 2' }}</div>
-        <div *ngIf="penaltyVisible" class="penalty-row">
-          <span *ngFor="let r of getPenaltySlots(1)">{{ r }}</span>
+      <div *ngIf="penaltyVisible || penaltyWinner" class="penalty-section">
+        <div *ngIf="penaltyVisible" class="penalty-box">
+          <h3>Definición por penales</h3>
+          <p>Turno: {{ currentShooter === 0 ? selectedTeamA?.name : selectedTeamB?.name }}</p>
+          <button (click)="takePenalty()" [disabled]="penaltyWinner">Patear penal</button>
         </div>
-      </div>
-      <div class="goal-log">
-        <ul>
-          <li *ngFor="let log of goalLog">{{ log }}</li>
-        </ul>
-      </div>
-      <div class="result-buttons-inline">
-        <button *ngIf="isMatchPlayed || penaltyWinner" (click)="resetMatch()" [disabled]="penaltyShootoutActive">Reiniciar</button>
-        <button *ngIf="matchClock === 90 && matchResult && matchResult.goalsTeamA === matchResult.goalsTeamB && !penaltyShootoutActive && penaltyWinner == null" (click)="startPenaltyShootout()">Ir a penales</button>
-      </div>
-    </div>
 
-    <div *ngIf="penaltyVisible || penaltyWinner" class="penalty-section">
-      <div *ngIf="penaltyVisible" class="penalty-box">
-        <h3>Definición por penales</h3>
-        <p>Turno: {{ currentShooter === 0 ? selectedTeamA?.name : selectedTeamB?.name }}</p>
-        <button (click)="takePenalty()" [disabled]="penaltyWinner">Patear penal</button>
-      </div>
-
-      <div *ngIf="penaltyWinner" class="winner-box">
-        <h3>¡Ganador por penales!</h3>
-        <p>{{ penaltyWinner.name }}</p>
+        <div *ngIf="penaltyWinner" class="winner-box">
+          <h3>¡Ganador por penales!</h3>
+          <p>{{ penaltyWinner.name }}</p>
+        </div>
       </div>
     </div>
   </div>
-</div>

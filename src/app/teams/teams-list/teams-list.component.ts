@@ -24,8 +24,8 @@ export class TeamsListComponent implements OnInit, OnDestroy {
   selectedConfederation: string = '';
   selectedLeague: string = '';
   searchName: string = '';
-  sortField: 'name' | 'score' = 'name';
-  sortDirection: 'asc' | 'desc' = 'asc';
+  sortField: 'name' | 'score' = 'score';
+  sortDirection: 'asc' | 'desc' = 'desc';
   uniqueConfederations: string[] = [];
   uniqueLeagues: string[] = [];
 
@@ -47,7 +47,7 @@ export class TeamsListComponent implements OnInit, OnDestroy {
     this.apiService.getTeams().subscribe({
       next: (data) => {
         this.teams = data;
-        this.extractUniqueFilters(data); // 👈 Nueva línea
+        this.extractUniqueFilters(data);
         this.isLoading = false;
       },
       error: (err) => {

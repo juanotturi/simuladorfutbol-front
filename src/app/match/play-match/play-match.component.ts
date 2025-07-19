@@ -59,7 +59,7 @@ export class PlayMatchComponent implements OnInit {
   matchInterval: any;
   matchTimer: any = null;
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService) { }
 
   ngOnInit(): void {
     this.loadTeams();
