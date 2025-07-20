@@ -1,23 +1,30 @@
-/* Tabs */
 .tabs button {
   margin-right: 8px;
   padding: 8px 16px;
-  border: none;
-  background-color: #ddd;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background-color: rgba(0, 0, 0, 0.4);
+  color: white;
   cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.tabs button:hover {
+  background-color: rgba(0, 0, 0, 0.6);
 }
 
 .tabs button.active {
-  background-color: #bbb;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #111;
   font-weight: bold;
+  border: 1px solid #ccc;
 }
 
-/* Filtros */
 .filters {
   margin-top: 16px;
 }
 
-/* Tabla de equipos */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -35,7 +42,6 @@ table th {
   background-color: #f0f0f0;
 }
 
-/* Imágenes de bandera/escudo */
 .flag-icon {
   height: 32px;
   width: auto;

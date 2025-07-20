@@ -1,26 +1,29 @@
-<h1>Simulador de Fútbol</h1>
-<nav>
-  <button 
-    [ngClass]="{ 'active-nav': isActive('/home') }" 
-    [disabled]="isActive('/home')" 
-    (click)="goToHome()">
-    Inicio
-  </button> | 
+<header class="app-header glass-container auto-width">
+  <h1 class="app-title">⚽ Simulador de Fútbol</h1>
+  <nav class="app-nav">
+    <button 
+      [ngClass]="{ 'active-nav': isActive('/home') }" 
+      [disabled]="isActive('/home')" 
+      (click)="goToHome()">
+      Inicio
+    </button>
 
-  <button 
-    [ngClass]="{ 'active-nav': isActive('/teams') }" 
-    [disabled]="isActive('/teams')" 
-    (click)="goToTeams()">
-    Equipos
-  </button> | 
+    <button 
+      [ngClass]="{ 'active-nav': isActive('/teams') }" 
+      [disabled]="isActive('/teams')" 
+      (click)="goToTeams()">
+      Equipos
+    </button>
 
-  <button 
-    [ngClass]="{ 'active-nav': isActive('/play-match') }" 
-    [disabled]="isActive('/play-match')" 
-    (click)="goToPlay()">
-    Jugar Partido
-  </button>
-</nav>
+    <button 
+      [ngClass]="{ 'active-nav': isActive('/play-match') }" 
+      [disabled]="isActive('/play-match')" 
+      (click)="goToPlay()">
+      Jugar Partido
+    </button>
+  </nav>
+</header>
 
 <hr>
+
 <router-outlet></router-outlet>

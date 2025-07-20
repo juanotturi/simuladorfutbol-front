@@ -58,6 +58,7 @@ export class PlayMatchComponent implements OnInit {
   matchClock = 0;
   matchInterval: any;
   matchTimer: any = null;
+  penaltyGoals: any;
 
   constructor(private apiService: ApiService) { }
 
@@ -205,13 +206,13 @@ export class PlayMatchComponent implements OnInit {
       this.matchClock = minute;
       if (this.goalTimelineA.includes(minute)) {
         this.liveGoalsA++;
-        const log = `⚽ Gol de ${this.selectedTeamA?.name} al ${minute}'`;
+        const log = `⚽ Gol de ${this.selectedTeamA?.name} (${minute}')`;
         this.goalLog.push(log);
         console.log(log);
       }
       if (this.goalTimelineB.includes(minute)) {
         this.liveGoalsB++;
-        const log = `⚽ Gol de ${this.selectedTeamB?.name} al ${minute}'`;
+        const log = `⚽ Gol de ${this.selectedTeamB?.name} (${minute}')`;
         this.goalLog.push(log);
         console.log(log);
       }
@@ -323,6 +324,14 @@ export class PlayMatchComponent implements OnInit {
     const actual = this.penaltyTurns[teamIndex];
     const size = Math.max(this.maxPenalties, actual.length);
     return Array.from({ length: size }, (_, idx) => actual[idx] || '⬜');
+  }
+
+  get penaltiesA(): number {
+    return this.penaltyVisible ? this.penaltyTurns[0].filter(r => r === '✅').length : (this.matchResult?.penaltiesA ?? 0);
+  }
+
+  get penaltiesB(): number {
+    return this.penaltyVisible ? this.penaltyTurns[1].filter(r => r === '✅').length : (this.matchResult?.penaltiesB ?? 0);
   }
 
   isInteractionBlocked(): boolean {

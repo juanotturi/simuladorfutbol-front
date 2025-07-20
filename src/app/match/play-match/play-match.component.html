@@ -1,6 +1,6 @@
 <div *ngIf="isLoading">Cargando partido...</div>
 
-<div *ngIf="!isLoading" class="match-container">
+<div *ngIf="!isLoading" class="match-container glass-container auto-width">
   <div class="selectors-column">
     <div class="selectors-content">
       <div class="team-selector">
@@ -76,63 +76,58 @@
 
   <div class="result-column">
     <div class="result-block-wrapper">
-      <div class="score-header">
-        <div *ngIf="matchClock > 0 && matchClock < 91" class="match-minute">
-          ⏱ Minuto: {{ matchClock }}
-        </div>
-        <div class="teams-row">
-          <div class="team-display">
-            <img [src]="selectedTeamA?.image || placeholderImage" alt="{{ selectedTeamA?.name || 'Equipo 1' }}"
-              class="flag-large">
-            <div>{{ selectedTeamA?.name || 'Equipo 1' }}</div>
-            <div *ngIf="penaltyVisible" class="penalty-row">
-              <span *ngFor="let r of getPenaltySlots(0)">{{ r }}</span>
-            </div>
+      <div class="teams-row">
+        <div class="team-display">
+          <img [src]="selectedTeamA?.image || placeholderImage" alt="{{ selectedTeamA?.name || 'Equipo 1' }}"
+            class="flag-large">
+          <div>{{ selectedTeamA?.name || 'Equipo 1' }}</div>
+          <div *ngIf="penaltyVisible" class="penalty-row">
+            <span *ngFor="let r of getPenaltySlots(0)">{{ r }}</span>
           </div>
+        </div>
 
+        <div class="score-central-absolute">
+          <div *ngIf="matchClock > 0 && matchClock < 91" class="match-minute">
+            ⏱ Minuto: {{ matchClock }}
+          </div>
           <div class="score-display">
-            <ng-container *ngIf="matchClock > 0 || isMatchPlayed; else placeholderScore">
+            <ng-container *ngIf="matchClock > 0 || isMatchPlayed || penaltyVisible; else placeholderScore">
               {{ liveGoalsA }}
-              <span *ngIf="matchResult?.penaltiesA != null && matchResult?.penaltiesB != null">
-                ({{ matchResult?.penaltiesA }})
-              </span>
+              <span *ngIf="penaltyVisible || matchResult?.penaltiesA != null">( {{ penaltiesA }} )</span>
               -
               {{ liveGoalsB }}
-              <span *ngIf="matchResult?.penaltiesA != null && matchResult?.penaltiesB != null">
-                ({{ matchResult?.penaltiesB }})
-              </span>
+              <span *ngIf="penaltyVisible || matchResult?.penaltiesB != null">( {{ penaltiesB }} )</span>
             </ng-container>
-            <ng-template #placeholderScore>
-              -
-            </ng-template>
-          </div>
-
-          <div class="team-display">
-            <img [src]="selectedTeamB?.image || placeholderImage" alt="{{ selectedTeamB?.name || 'Equipo 2' }}"
-              class="flag-large">
-            <div>{{ selectedTeamB?.name || 'Equipo 2' }}</div>
-            <div *ngIf="penaltyVisible" class="penalty-row">
-              <span *ngFor="let r of getPenaltySlots(1)">{{ r }}</span>
-            </div>
+            <ng-template #placeholderScore>-</ng-template>
           </div>
         </div>
-        <div class="goal-log">
+
+        <div class="team-display">
+          <img [src]="selectedTeamB?.image || placeholderImage" alt="{{ selectedTeamB?.name || 'Equipo 2' }}"
+            class="flag-large">
+          <div>{{ selectedTeamB?.name || 'Equipo 2' }}</div>
+          <div *ngIf="penaltyVisible" class="penalty-row">
+            <span *ngFor="let r of getPenaltySlots(1)">{{ r }}</span>
+          </div>
+        </div>
+
+        <div class="goal-log" style="margin-left: 24px; align-self: flex-start; width: fit-content;">
           <ul>
             <li *ngFor="let log of goalLog">{{ log }}</li>
           </ul>
         </div>
-        <div class="result-buttons-inline">
-          <button *ngIf="isMatchPlayed || penaltyWinner" (click)="resetMatch()"
-            [disabled]="penaltyShootoutActive">Reiniciar</button>
-          <button
-            *ngIf="matchClock === 90 && matchResult && matchResult.goalsTeamA === matchResult.goalsTeamB && !penaltyShootoutActive && penaltyWinner == null"
-            (click)="startPenaltyShootout()">Ir a penales</button>
-        </div>
+      </div>
+      <div class="result-buttons-inline match-action-buttons">
+        <button *ngIf="isMatchPlayed || penaltyWinner" (click)="resetMatch()" [disabled]="penaltyShootoutActive">
+          Reiniciar
+        </button>
+        <button
+          *ngIf="matchClock === 90 && matchResult && matchResult.goalsTeamA === matchResult.goalsTeamB && !penaltyShootoutActive && penaltyWinner == null"
+          (click)="startPenaltyShootout()">Ir a penales</button>
       </div>
 
       <div *ngIf="penaltyVisible || penaltyWinner" class="penalty-section">
         <div *ngIf="penaltyVisible" class="penalty-box">
-          <h3>Definición por penales</h3>
           <p>Turno: {{ currentShooter === 0 ? selectedTeamA?.name : selectedTeamB?.name }}</p>
           <button (click)="takePenalty()" [disabled]="penaltyWinner">Patear penal</button>
         </div>
