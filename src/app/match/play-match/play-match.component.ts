@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { Team } from '../../models/team.model';
 import { MatchResult } from '../../models/match-result.model';
+import { Player } from '../../models/player.model';
+import { forkJoin, of } from 'rxjs';
 
 @Component({
   selector: 'app-play-match',
@@ -23,6 +25,7 @@ export class PlayMatchComponent implements OnInit {
   goalLog: string[] = [];
   isMatchInProgress = false;
   isMatchPlayed = false;
+  private teamHasPlayers = new Map<number, boolean>();
 
   placeholderImage = '/assets/placeholder_pelota.png';
 
@@ -144,18 +147,43 @@ export class PlayMatchComponent implements OnInit {
     this.matchResult = undefined;
     this.matchClock = 0;
     this.isMatchInProgress = true;
+    this.goalLog = [];
 
-    this.apiService.getMatchResult(this.selectedTeamA.score, this.selectedTeamB.score).subscribe({
-      next: (result) => {
-        this.matchResult = result;
-        this.generateGoalTimeline();
-        this.startMatchClock();
+    const idA = this.selectedTeamA.id;
+    const idB = this.selectedTeamB.id;
+
+    forkJoin({
+      a: this.teamHasPlayers.has(idA) ? of(this.teamHasPlayers.get(idA)!) : this.apiService.hasPlayers(idA),
+      b: this.teamHasPlayers.has(idB) ? of(this.teamHasPlayers.get(idB)!) : this.apiService.hasPlayers(idB),
+    }).subscribe({
+      next: ({ a, b }) => {
+        this.teamHasPlayers.set(idA, !!a);
+        this.teamHasPlayers.set(idB, !!b);
+
+        this.apiService.getMatchResult(this.selectedTeamA!.score, this.selectedTeamB!.score).subscribe({
+          next: (result) => {
+            this.matchResult = result;
+            this.generateGoalTimeline();
+            this.startMatchClock();
+          },
+          error: () => { this.isLoading = false; }
+        });
       },
       error: () => {
-        this.isLoading = false;
+        this.teamHasPlayers.set(idA, false);
+        this.teamHasPlayers.set(idB, false);
+        this.apiService.getMatchResult(this.selectedTeamA!.score, this.selectedTeamB!.score).subscribe({
+          next: (result) => {
+            this.matchResult = result;
+            this.generateGoalTimeline();
+            this.startMatchClock();
+          },
+          error: () => { this.isLoading = false; }
+        });
       }
     });
   }
+
 
   generateGoalTimeline() {
     const goalsA = this.matchResult?.goalsTeamA ?? 0;
@@ -196,6 +224,26 @@ export class PlayMatchComponent implements OnInit {
     this.goalTimelineB = shuffled.slice(goalsA).sort((a, b) => a - b);
   }
 
+  private pushGoalLog(team: Team, minute: number, side: 'A' | 'B') {
+    const teamId = team.id;
+    const has = this.teamHasPlayers.get(teamId) === true;
+
+    if (!has) {
+      this.goalLog.push(`⚽ Gol de ${team.name} (${minute}')`);
+      return;
+    }
+
+    this.apiService.getRandomScorer(teamId).subscribe({
+      next: (author) => {
+        const authorText = author ? ` — ${author.name}` : '';
+        this.goalLog.push(`⚽ Gol de ${team.name} ${authorText} (${minute}')`);
+      },
+      error: () => {
+        this.goalLog.push(`⚽ Gol de ${team.name} (${minute}')`);
+      }
+    });
+  }
+
   startMatchClock() {
     const duration = this.selectedDuration;
     const intervalTime = duration / 90;
@@ -204,18 +252,17 @@ export class PlayMatchComponent implements OnInit {
     this.matchTimer = setInterval(() => {
       minute++;
       this.matchClock = minute;
-      if (this.goalTimelineA.includes(minute)) {
+
+      if (this.goalTimelineA.includes(minute) && this.selectedTeamA) {
         this.liveGoalsA++;
-        const log = `⚽ Gol de ${this.selectedTeamA?.name} (${minute}')`;
-        this.goalLog.push(log);
-        console.log(log);
+        this.pushGoalLog(this.selectedTeamA, minute, 'A');
       }
-      if (this.goalTimelineB.includes(minute)) {
+
+      if (this.goalTimelineB.includes(minute) && this.selectedTeamB) {
         this.liveGoalsB++;
-        const log = `⚽ Gol de ${this.selectedTeamB?.name} (${minute}')`;
-        this.goalLog.push(log);
-        console.log(log);
+        this.pushGoalLog(this.selectedTeamB, minute, 'B');
       }
+
       if (minute >= 90) {
         clearInterval(this.matchTimer);
         this.isMatchPlayed = true;
@@ -336,6 +383,126 @@ export class PlayMatchComponent implements OnInit {
 
   isInteractionBlocked(): boolean {
     return this.isMatchPlayed || this.penaltyShootoutActive || this.penaltyWinner != null || this.isMatchInProgress;
+  }
+
+  private pickRandom(pool: Team[], excludeId?: number): Team | undefined {
+    if (!pool.length) return undefined;
+    if (excludeId == null) {
+      const idx = Math.floor(Math.random() * pool.length);
+      return pool[idx];
+    }
+    let candidate: Team | undefined;
+    let tries = 0;
+    do {
+      const idx = Math.floor(Math.random() * pool.length);
+      candidate = pool[idx];
+      tries++;
+    } while (candidate && candidate.id === excludeId && tries < 50);
+    return candidate;
+  }
+
+  private applyTeamToSide(side: 'A' | 'B', team: Team): void {
+    const type = team.league ? 'CLUB' as const : 'SELECCION' as const;
+    const secondLevel = team.league ?? team.confederation ?? null;
+
+    if (side === 'A') {
+      this.typeA = type;
+      this.filterAConfLeague = secondLevel;
+      this.selectedTeamA = team;
+    } else {
+      this.typeB = type;
+      this.filterBConfLeague = secondLevel;
+      this.selectedTeamB = team;
+    }
+  }
+
+  randomTeam(side: 'A' | 'B', scope: 'all' | 'filters' = 'all'): void {
+    if (this.isInteractionBlocked() || !this.teams?.length) return;
+
+    let pool: Team[] = [];
+    if (scope === 'all') {
+      pool = this.teams;
+    } else {
+      pool = side === 'A' ? this.filteredTeamsA : this.filteredTeamsB;
+    }
+
+    const otherId = side === 'A' ? this.selectedTeamB?.id : this.selectedTeamA?.id;
+    const chosen = this.pickRandom(pool, otherId);
+
+    if (chosen) {
+      this.applyTeamToSide(side, chosen);
+    }
+  }
+
+  private randomFromArray<T>(arr: T[]): T | undefined {
+    if (!arr || arr.length === 0) return undefined;
+    const idx = Math.floor(Math.random() * arr.length);
+    return arr[idx];
+  }
+
+  private getFiltered(side: 'A' | 'B'): Team[] {
+    return side === 'A' ? this.filteredTeamsA : this.filteredTeamsB;
+  }
+
+  randomNext(side: 'A' | 'B'): void {
+    if (this.isInteractionBlocked()) return;
+
+    if (side === 'A') {
+      if (!this.typeA) {
+        this.typeA = Math.random() < 0.5 ? 'SELECCION' : 'CLUB';
+        return;
+      }
+
+      if (!this.filterAConfLeague) {
+        const opts = this.getSecondLevelOptions(this.typeA);
+        this.filterAConfLeague = this.randomFromArray(opts) ?? null;
+        return;
+      }
+
+      const otherId = this.selectedTeamB?.id;
+      if (!this.selectedTeamA) {
+        let pool = this.getFiltered('A');
+        if (otherId != null) pool = pool.filter(t => t.id !== otherId);
+        if (pool.length === 0) pool = this.getFiltered('A');
+        const chosen = this.randomFromArray(pool);
+        if (chosen) this.selectedTeamA = chosen;
+        return;
+      }
+
+      let pool = this.getFiltered('A').filter(t => t.id !== this.selectedTeamA!.id);
+      if (otherId != null) pool = pool.filter(t => t.id !== otherId);
+      if (pool.length === 0) pool = this.getFiltered('A');
+      const reroll = this.randomFromArray(pool);
+      if (reroll) this.selectedTeamA = reroll;
+      return;
+    }
+
+    if (!this.typeB) {
+      this.typeB = Math.random() < 0.5 ? 'SELECCION' : 'CLUB';
+      return;
+    }
+
+    if (!this.filterBConfLeague) {
+      const opts = this.getSecondLevelOptions(this.typeB);
+      this.filterBConfLeague = this.randomFromArray(opts) ?? null;
+      return;
+    }
+
+    const otherId = this.selectedTeamA?.id;
+    if (!this.selectedTeamB) {
+      let pool = this.getFiltered('B');
+      if (otherId != null) pool = pool.filter(t => t.id !== otherId);
+      if (pool.length === 0) pool = this.getFiltered('B');
+      const chosen = this.randomFromArray(pool);
+      if (chosen) this.selectedTeamB = chosen;
+      return;
+    }
+
+    let pool = this.getFiltered('B').filter(t => t.id !== this.selectedTeamB!.id);
+    if (otherId != null) pool = pool.filter(t => t.id !== otherId);
+    if (pool.length === 0) pool = this.getFiltered('B');
+    const reroll = this.randomFromArray(pool);
+    if (reroll) this.selectedTeamB = reroll;
   }
 
   resetMatch() {

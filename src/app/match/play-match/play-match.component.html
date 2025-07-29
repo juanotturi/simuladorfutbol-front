@@ -4,8 +4,13 @@
   <div class="selectors-column">
     <div class="selectors-content">
       <div class="team-selector">
-        <h4>Equipo 1</h4>
-
+        <div class="selector-header">
+          <h4>Equipo 1</h4>
+          <button type="button" class="btn-secondary btn-compact" (click)="randomNext('A')"
+            [disabled]="isInteractionBlocked()">
+            🔀 Aleatorio
+          </button>
+        </div>
         <label>
           Tipo:
           <select [(ngModel)]="typeA" [disabled]="isInteractionBlocked()">
@@ -35,8 +40,13 @@
       </div>
 
       <div class="team-selector">
-        <h4>Equipo 2</h4>
-
+        <div class="selector-header">
+          <h4>Equipo 2</h4>
+          <button type="button" class="btn-secondary btn-compact" (click)="randomNext('B')"
+            [disabled]="isInteractionBlocked()">
+            🔀 Aleatorio
+          </button>
+        </div>
         <label>
           Tipo:
           <select [(ngModel)]="typeB" [disabled]="isInteractionBlocked()">
@@ -133,7 +143,7 @@
         </div>
 
         <div *ngIf="penaltyWinner" class="winner-box">
-          <h3>¡Ganador por penales!</h3>
+          <h3>¡Ganador!</h3>
           <p>{{ penaltyWinner.name }}</p>
         </div>
       </div>

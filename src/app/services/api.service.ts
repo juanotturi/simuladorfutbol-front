@@ -1,15 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
 import { Team } from '../models/team.model';
 import { MatchResult } from '../models/match-result.model';
+import { Player } from '../models/player.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
 
-  private BASE_URL = 'http://localhost:8080';  
+  private BASE_URL = 'http://localhost:8080';
 
   constructor(private http: HttpClient) { }
 
@@ -31,11 +32,26 @@ export class ApiService {
    * Recibe scoreA y scoreB y devuelve los goles de cada equipo
    */
   getMatchResult(scoreA: number, scoreB: number): Observable<MatchResult> {
-  return this.http.get<MatchResult>(`${this.BASE_URL}/playMatch`, {
-    params: {
-      scoreA: scoreA,
-      scoreB: scoreB
-    }
-  });
-}
+    return this.http.get<MatchResult>(`${this.BASE_URL}/playMatch`, {
+      params: {
+        scoreA: scoreA,
+        scoreB: scoreB
+      }
+    });
+  }
+
+  getPlayersByTeam(teamId: number) {
+    return this.http.get<Player[]>(`${this.BASE_URL}/players/team/${teamId}`);
+  }
+
+  hasPlayers(teamId: number) {
+    return this.getPlayersByTeam(teamId).pipe(
+      map(players => (players?.length ?? 0) > 0),
+      catchError(() => of(false))
+    );
+  }
+
+  getRandomScorer(teamId: number) {
+    return this.http.get<Player>(`${this.BASE_URL}/players/team/${teamId}/random-scorer`);
+  }
 }

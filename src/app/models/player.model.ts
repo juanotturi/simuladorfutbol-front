@@ -1,0 +1,6 @@
+export interface Player {
+  id: number;
+  idTeam: number;
+  name: string;
+  goalProbability: number;
+}

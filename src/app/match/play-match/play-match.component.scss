@@ -22,6 +22,58 @@
   gap: 8px;
 }
 
+/* Encabezado del selector: título a la izquierda, botón a la derecha */
+.selector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+  /* separa del siguiente label */
+}
+
+.selector-header h4 {
+  margin: 0;
+  /* elimina márgenes verticales del h4 */
+  font-size: 14px;
+  /* mismo tamaño que ya usabas */
+  font-weight: 600;
+}
+
+/* Botón compacto para que calce con la altura del input */
+.btn-secondary {
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color .15s ease, transform .1s ease;
+}
+
+.btn-secondary:hover:enabled {
+  background: #eef2f7;
+  transform: translateY(-1px);
+}
+
+.btn-secondary:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.btn-compact {
+  height: 32px;
+  line-height: 20px;
+}
+
+@media (max-width: 340px) {
+  .selector-header {
+    flex-wrap: wrap;
+  }
+}
+
 .team-selector {
   border: 1px solid #ccc;
   padding: 6px 8px;
@@ -100,10 +152,10 @@
 }
 
 .flag-large {
-  width: 180px;
-  height: 120px;
-  max-width: 180px;
-  max-height: 120px;
+  width: 210px;
+  height: 140px;
+  max-width: 210px;
+  max-height: 140px;
   object-fit: contain;
   border: 1px solid #ccc;
   box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
