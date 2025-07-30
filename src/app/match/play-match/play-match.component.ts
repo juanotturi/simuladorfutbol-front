@@ -26,6 +26,12 @@ export class PlayMatchComponent implements OnInit {
   isMatchInProgress = false;
   isMatchPlayed = false;
   private teamHasPlayers = new Map<number, boolean>();
+  lastTeamA: Team | null = null;
+  lastTeamB: Team | null = null;
+  lastTypeA: 'SELECCION' | 'CLUB' | null = null;
+  lastTypeB: 'SELECCION' | 'CLUB' | null = null;
+  lastConfA: string | null = null;
+  lastConfB: string | null = null;
 
   placeholderImage = '/assets/placeholder_pelota.png';
 
@@ -141,6 +147,13 @@ export class PlayMatchComponent implements OnInit {
       return;
     }
 
+    this.lastTeamA = this.selectedTeamA;
+    this.lastTeamB = this.selectedTeamB;
+    this.lastTypeA = this.typeA;
+    this.lastTypeB = this.typeB;
+    this.lastConfA = this.filterAConfLeague;
+    this.lastConfB = this.filterBConfLeague;
+
     this.liveGoalsA = 0;
     this.liveGoalsB = 0;
     this.isMatchPlayed = false;
@@ -184,6 +197,29 @@ export class PlayMatchComponent implements OnInit {
     });
   }
 
+  repeatMatch(): void {
+    if (this.lastTeamA && this.lastTeamB && this.lastTypeA && this.lastTypeB) {
+      this.typeA = this.lastTypeA;
+      this.typeB = this.lastTypeB;
+      this.filterAConfLeague = this.lastConfA;
+      this.filterBConfLeague = this.lastConfB;
+      this.selectedTeamA = this.lastTeamA;
+      this.selectedTeamB = this.lastTeamB;
+      this.liveGoalsA = 0;
+      this.liveGoalsB = 0;
+      this.matchResult = undefined;
+      this.isMatchPlayed = false;
+      this.penaltyShootoutActive = false;
+      this.isPenaltyInProgress = false;
+      this.penaltyVisible = false;
+      this.penaltyWinner = null;
+      this.penaltyTurns = [[], []];
+      this.isSuddenDeath = false;
+      this.matchClock = 0;
+      this.goalLog = [];
+      this.isMatchInProgress = false;
+    }
+  }
 
   generateGoalTimeline() {
     const goalsA = this.matchResult?.goalsTeamA ?? 0;

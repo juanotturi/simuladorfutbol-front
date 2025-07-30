@@ -22,21 +22,15 @@
   gap: 8px;
 }
 
-/* Encabezado del selector: título a la izquierda, botón a la derecha */
 .selector-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 6px;
-  /* separa del siguiente label */
 }
 
 .selector-header h4 {
   margin: 0;
-  /* elimina márgenes verticales del h4 */
   font-size: 14px;
-  /* mismo tamaño que ya usabas */
   font-weight: 600;
 }
 
@@ -82,7 +76,7 @@
   font-size: 14px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 2px;
 }
 
 .team-selector h4 {
@@ -152,10 +146,10 @@
 }
 
 .flag-large {
-  width: 210px;
-  height: 140px;
-  max-width: 210px;
-  max-height: 140px;
+  width: 180px;
+  height: 120px;
+  max-width: 180px;
+  max-height: 120px;
   object-fit: contain;
   border: 1px solid #ccc;
   box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
@@ -215,8 +209,8 @@
 .penalty-section {
   display: flex;
   flex-direction: row;
-  gap: 24px;
-  margin-top: 24px;
+  gap: 10px;
+  margin-top: 8px;
   flex-wrap: nowrap;
   align-items: flex-start;
 }
@@ -241,6 +235,11 @@
   align-items: flex-start;
   gap: 48px;
   flex-wrap: wrap;
+}
+
+.penalty-score {
+  font-size: 18px;
+  font-weight: normal;
 }
 
 .penalty-team {
@@ -321,7 +320,7 @@
   }
 
   .score-display {
-    font-size: 24px;
+    font-size: 20px;
   }
 }
 
@@ -364,7 +363,6 @@
   flex-direction: column;
   align-items: flex-start;
   width: 100%;
-  gap: 16px;
 }
 
 .score-section {
@@ -451,11 +449,10 @@ button:hover:enabled {
 .score-display {
   font-size: 28px;
   font-weight: bold;
+  white-space: nowrap;
 }
 
 .match-action-buttons {
   display: flex;
   justify-content: center;
-  gap: 12px;
-  margin-top: 12px;
 }

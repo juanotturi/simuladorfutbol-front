@@ -92,7 +92,7 @@
             class="flag-large">
           <div>{{ selectedTeamA?.name || 'Equipo 1' }}</div>
           <div *ngIf="penaltyVisible" class="penalty-row">
-            <span *ngFor="let r of getPenaltySlots(0)">{{ r }}</span>
+            <span *ngFor="let r of getPenaltySlots(0).slice(-5)">{{ r }}</span>
           </div>
         </div>
 
@@ -103,10 +103,12 @@
           <div class="score-display">
             <ng-container *ngIf="matchClock > 0 || isMatchPlayed || penaltyVisible; else placeholderScore">
               {{ liveGoalsA }}
-              <span *ngIf="penaltyVisible || matchResult?.penaltiesA != null">( {{ penaltiesA }} )</span>
+              <span class="penalty-score" *ngIf="penaltyVisible || matchResult?.penaltiesA != null">({{ penaltiesA
+                }})</span>
               -
               {{ liveGoalsB }}
-              <span *ngIf="penaltyVisible || matchResult?.penaltiesB != null">( {{ penaltiesB }} )</span>
+              <span class="penalty-score" *ngIf="penaltyVisible || matchResult?.penaltiesB != null">({{ penaltiesB
+                }})</span>
             </ng-container>
             <ng-template #placeholderScore>-</ng-template>
           </div>
@@ -117,7 +119,7 @@
             class="flag-large">
           <div>{{ selectedTeamB?.name || 'Equipo 2' }}</div>
           <div *ngIf="penaltyVisible" class="penalty-row">
-            <span *ngFor="let r of getPenaltySlots(1)">{{ r }}</span>
+            <span *ngFor="let r of getPenaltySlots(1).slice(-5)">{{ r }}</span>
           </div>
         </div>
 
@@ -130,6 +132,9 @@
       <div class="result-buttons-inline match-action-buttons">
         <button *ngIf="isMatchPlayed || penaltyWinner" (click)="resetMatch()" [disabled]="penaltyShootoutActive">
           Reiniciar
+        </button>
+        <button *ngIf="isMatchPlayed || penaltyWinner" (click)="repeatMatch()" [disabled]="penaltyShootoutActive">
+          Revancha
         </button>
         <button
           *ngIf="matchClock === 90 && matchResult && matchResult.goalsTeamA === matchResult.goalsTeamB && !penaltyShootoutActive && penaltyWinner == null"
