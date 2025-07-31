@@ -3,4 +3,5 @@ export interface Player {
   idTeam: number;
   name: string;
   goalProbability: number;
+  position: string;
 }
