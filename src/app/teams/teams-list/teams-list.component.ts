@@ -16,6 +16,7 @@ import { environment } from '../../../environments/environment';
 })
 export class TeamsListComponent implements OnInit, OnDestroy {
   apiBaseUrl = environment.apiBaseUrl;
+  assetsBaseUrl = environment.assetsBaseUrl;
   teams: Team[] = [];
   isLoading = false;
   private subscription?: Subscription;

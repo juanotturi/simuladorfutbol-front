@@ -88,7 +88,7 @@
     <div class="result-block-wrapper">
       <div class="teams-row">
         <div class="team-display">
-          <img [src]="selectedTeamA?.image ? apiBaseUrl + '/' + selectedTeamA?.image : placeholderImage"
+          <img [src]="selectedTeamA?.image ? assetsBaseUrl + '/' + selectedTeamA?.image : placeholderImage"
             alt="{{ selectedTeamA?.name || 'Equipo 1' }}" class="flag-large">
           <div>{{ selectedTeamA?.name || 'Equipo 1' }}</div>
           <div *ngIf="penaltyVisible" class="penalty-row">
@@ -115,7 +115,7 @@
         </div>
 
         <div class="team-display">
-          <img [src]="selectedTeamB?.image ? apiBaseUrl + '/' + selectedTeamB?.image : placeholderImage"
+          <img [src]="selectedTeamB?.image ? assetsBaseUrl + '/' + selectedTeamB?.image : placeholderImage"
             alt="{{ selectedTeamB?.name || 'Equipo 2' }}" class="flag-large">
           <div>{{ selectedTeamB?.name || 'Equipo 2' }}</div>
           <div *ngIf="penaltyVisible" class="penalty-row">
