@@ -4,8 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { Team } from '../../models/team.model';
 import { MatchResult } from '../../models/match-result.model';
-import { Player } from '../../models/player.model';
 import { forkJoin, of } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-play-match',
@@ -15,6 +15,7 @@ import { forkJoin, of } from 'rxjs';
   styleUrls: ['./play-match.component.scss']
 })
 export class PlayMatchComponent implements OnInit {
+  apiBaseUrl = environment.apiBaseUrl;
   teams: Team[] = [];
   isLoading = false;
   matchResult?: MatchResult;

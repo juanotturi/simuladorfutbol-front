@@ -4,13 +4,14 @@ import { catchError, map, Observable, of } from 'rxjs';
 import { Team } from '../models/team.model';
 import { MatchResult } from '../models/match-result.model';
 import { Player } from '../models/player.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
 
-  private BASE_URL = 'http://localhost:8080';
+  private BASE_URL = environment.apiBaseUrl;
 
   constructor(private http: HttpClient) { }
 

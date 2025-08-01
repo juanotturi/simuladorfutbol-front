@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { NavigationService } from '../../services/navigation.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-teams-list',
@@ -14,7 +15,7 @@ import { NavigationService } from '../../services/navigation.service';
   styleUrls: ['./teams-list.component.scss']
 })
 export class TeamsListComponent implements OnInit, OnDestroy {
-
+  apiBaseUrl = environment.apiBaseUrl;
   teams: Team[] = [];
   isLoading = false;
   private subscription?: Subscription;
@@ -32,7 +33,7 @@ export class TeamsListComponent implements OnInit, OnDestroy {
   constructor(
     private apiService: ApiService,
     private navigationService: NavigationService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.subscription = this.navigationService.loadTeams$.subscribe(() => {
