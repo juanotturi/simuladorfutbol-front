@@ -4,4 +4,5 @@ export interface Player {
   name: string;
   goalProbability: number;
   position: string;
+  penaltyOrder: number;
 }

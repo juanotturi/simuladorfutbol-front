@@ -34,6 +34,7 @@ export class PlayMatchComponent implements OnInit {
   lastTypeB: 'SELECCION' | 'CLUB' | null = null;
   lastConfA: string | null = null;
   lastConfB: string | null = null;
+  penaltyPlayersByTeam = new Map<number, { name: string }[]>();
 
   placeholderImage = '/assets/placeholder_pelota.png';
 
@@ -135,6 +136,26 @@ export class PlayMatchComponent implements OnInit {
     if (type === 'SELECCION') return this.uniqueConfederations;
     if (type === 'CLUB') return this.uniqueLeagues;
     return [];
+  }
+
+  getCurrentPenaltyShooter(): string {
+    const team = this.currentShooter === 0 ? this.selectedTeamA : this.selectedTeamB;
+    const teamId = team?.id;
+    const teamCode = team?.code;
+    const teamName = team?.name ?? 'Equipo';
+
+    if (!teamId) return teamName;
+
+    const shooters = this.penaltyPlayersByTeam.get(teamId);
+
+    if (!shooters || shooters.length === 0) {
+      return teamName;
+    }
+
+    const shotsTaken = this.penaltyTurns[this.currentShooter].length;
+    const shooter = shooters[shotsTaken % shooters.length];
+
+    return `${shooter.name} (${teamCode})`;
   }
 
   get filteredTeamsA(): Team[] {
@@ -337,15 +358,33 @@ export class PlayMatchComponent implements OnInit {
   }
 
   startPenaltyShootout() {
-    this.penaltyShootoutActive = true;
-    this.isPenaltyInProgress = true;
-    this.penaltyVisible = true;
-    this.penaltyTurns = [[], []];
-    this.penaltyWinner = null;
-    this.isSuddenDeath = false;
-    this.isMatchPlayed = false;
+    this.penaltyPlayersByTeam.clear();
 
-    this.currentShooter = Math.random() < 0.5 ? 0 : 1;
+    const idA = this.selectedTeamA?.id;
+    const idB = this.selectedTeamB?.id;
+
+    if (!idA || !idB) return;
+
+    forkJoin({
+      a: this.apiService.getPlayersByTeam(idA),
+      b: this.apiService.getPlayersByTeam(idB)
+    }).subscribe(({ a, b }) => {
+      const orderedA = a.filter(p => p.penaltyOrder > 0).sort((x, y) => x.penaltyOrder - y.penaltyOrder);
+      const orderedB = b.filter(p => p.penaltyOrder > 0).sort((x, y) => x.penaltyOrder - y.penaltyOrder);
+
+      this.penaltyPlayersByTeam.set(idA, orderedA);
+      this.penaltyPlayersByTeam.set(idB, orderedB);
+
+      this.penaltyShootoutActive = true;
+      this.isPenaltyInProgress = true;
+      this.penaltyVisible = true;
+      this.penaltyTurns = [[], []];
+      this.penaltyWinner = null;
+      this.isSuddenDeath = false;
+      this.isMatchPlayed = false;
+
+      this.currentShooter = Math.random() < 0.5 ? 0 : 1;
+    });
   }
 
   takePenalty() {
