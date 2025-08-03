@@ -8,7 +8,7 @@ import { NgClass } from '@angular/common';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [ RouterOutlet, NgClass ],
+  imports: [RouterOutlet, NgClass],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
@@ -24,7 +24,7 @@ export class AppComponent {
       .pipe(filter((e) => e instanceof NavigationEnd))
       .subscribe((e: NavigationEnd) => {
         this.currentRoute = e.urlAfterRedirects;
-    });
+      });
   }
 
   isActive(route: string): boolean {
@@ -40,8 +40,16 @@ export class AppComponent {
       this.navigationService.requestLoadTeams();
     });
   }
-  
+
   goToPlay() {
     this.router.navigate(['/play-match']);
+  }
+
+  goToPlayTournament() {
+    this.router.navigate(['/play-tournament']);
+  }
+
+  goToCreateTournament() {
+    this.router.navigate(['/create-tournament']);
   }
 }

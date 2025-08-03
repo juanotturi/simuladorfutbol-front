@@ -1,25 +1,27 @@
 <header class="app-header glass-container auto-width">
   <h1 class="app-title">⚽ Simulador de Fútbol</h1>
   <nav class="app-nav">
-    <button 
-      [ngClass]="{ 'active-nav': isActive('/home') }" 
-      [disabled]="isActive('/home')" 
-      (click)="goToHome()">
+    <button [ngClass]="{ 'active-nav': isActive('/home') }" [disabled]="isActive('/home')" (click)="goToHome()">
       Inicio
     </button>
 
-    <button 
-      [ngClass]="{ 'active-nav': isActive('/teams') }" 
-      [disabled]="isActive('/teams')" 
-      (click)="goToTeams()">
+    <button [ngClass]="{ 'active-nav': isActive('/teams') }" [disabled]="isActive('/teams')" (click)="goToTeams()">
       Equipos
     </button>
 
-    <button 
-      [ngClass]="{ 'active-nav': isActive('/play-match') }" 
-      [disabled]="isActive('/play-match')" 
+    <button [ngClass]="{ 'active-nav': isActive('/play-match') }" [disabled]="isActive('/play-match')"
       (click)="goToPlay()">
       Jugar Partido
+    </button>
+
+    <button [ngClass]="{ 'active-nav': isActive('/play-tournament') }" [disabled]="isActive('/play-tournament')"
+      (click)="goToPlayTournament()">
+      Jugar Torneo
+    </button>
+
+    <button [ngClass]="{ 'active-nav': isActive('/create-tournament') }" [disabled]="isActive('/create-tournament')"
+      (click)="goToCreateTournament()">
+      Crear Torneo
     </button>
   </nav>
 </header>

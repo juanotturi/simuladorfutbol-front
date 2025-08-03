@@ -75,16 +75,26 @@ export class TeamsListComponent implements OnInit, OnDestroy {
     this.uniqueConfederations = Array.from(confSet).sort();
 
     this.uniqueLeagues = Array.from(leagueSet).sort((a, b) => {
-      const codeA = a.match(/\((.*?)\)/)?.[1] ?? '';
-      const codeB = b.match(/\((.*?)\)/)?.[1] ?? '';
+      const mA = a.match(/\(([^)]+)\)/);
+      const mB = b.match(/\(([^)]+)\)/);
 
-      const [countryA, levelA] = codeA.split(' ');
-      const [countryB, levelB] = codeB.split(' ');
+      const hasA = !!mA;
+      const hasB = !!mB;
 
-      if (countryA < countryB) return -1;
-      if (countryA > countryB) return 1;
+      if (hasA && !hasB) return -1;
+      if (!hasA && hasB) return 1;
 
-      return parseInt(levelA) - parseInt(levelB);
+      if (!hasA && !hasB) return a.localeCompare(b, 'es');
+
+      const [countryA, levelAStr = '999'] = mA![1].split(' ');
+      const [countryB, levelBStr = '999'] = mB![1].split(' ');
+
+      const byCountry = countryA.localeCompare(countryB, 'es');
+      if (byCountry !== 0) return byCountry;
+
+      const levelA = parseInt(levelAStr, 10);
+      const levelB = parseInt(levelBStr, 10);
+      return (isNaN(levelA) ? 999 : levelA) - (isNaN(levelB) ? 999 : levelB);
     });
   }
 

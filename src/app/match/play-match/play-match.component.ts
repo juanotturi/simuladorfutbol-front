@@ -416,9 +416,13 @@ export class PlayMatchComponent implements OnInit {
   }
 
   getPenaltySlots(teamIndex: number): ('✅' | '❌' | '⬜')[] {
-    const actual = this.penaltyTurns[teamIndex];
-    const size = Math.max(this.maxPenalties, actual.length);
-    return Array.from({ length: size }, (_, idx) => actual[idx] || '⬜');
+    const current = this.penaltyTurns[teamIndex];
+    const other = this.penaltyTurns[teamIndex === 0 ? 1 : 0];
+
+    const maxBase = this.maxPenalties;
+    const maxLength = Math.max(maxBase, current.length, other.length);
+
+    return Array.from({ length: maxLength }, (_, idx) => current[idx] || '⬜');
   }
 
   get penaltiesA(): number {
