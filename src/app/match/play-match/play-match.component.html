@@ -123,12 +123,23 @@
           </div>
         </div>
 
-        <div class="goal-log" style="margin-left: 24px; align-self: flex-start; width: fit-content;">
-          <ul>
-            <li *ngFor="let log of goalLog">{{ log }}</li>
-          </ul>
+        <div class="goal-log-section" style="margin-left: 24px; align-self: flex-start; width: fit-content;">
+          <div class="goal-log" *ngIf="goalLog.length > 0">
+            <h4>Goles</h4>
+            <ul>
+              <li *ngFor="let log of goalLog">{{ log }}</li>
+            </ul>
+          </div>
+
+          <div *ngIf="penaltyShootoutLog.length > 0" class="penalty-shootout-log">
+            <h4>Definición por penales</h4>
+            <ul>
+              <li *ngFor="let entry of penaltyShootoutLog">{{ entry }}</li>
+            </ul>
+          </div>
         </div>
       </div>
+      <hr class="divider" />
       <div class="result-buttons-inline match-action-buttons">
         <button *ngIf="isMatchPlayed || penaltyWinner" (click)="resetMatch()" [disabled]="penaltyShootoutActive">
           Reiniciar

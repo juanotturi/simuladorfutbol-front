@@ -35,6 +35,7 @@ export class PlayMatchComponent implements OnInit {
   lastConfA: string | null = null;
   lastConfB: string | null = null;
   penaltyPlayersByTeam = new Map<number, { name: string }[]>();
+  allPlayersByTeam = new Map<number, { name: string, position: string }[]>();
 
   placeholderImage = '/assets/placeholder_pelota.png';
 
@@ -42,10 +43,12 @@ export class PlayMatchComponent implements OnInit {
   penaltyVisible = false;
   penaltyTurns: ('✅' | '❌')[][] = [[], []];
   currentShooter: 0 | 1 = 0;
+  lastShooter: string = "";
   penaltyWinner: Team | null = null;
   maxPenalties: number = 5;
   isSuddenDeath = false;
   isPenaltyInProgress = false;
+  penaltyShootoutLog: string[] = [];
 
   typeA: 'SELECCION' | 'CLUB' | null = null;
   filterAConfLeague: string | null = null;
@@ -154,8 +157,8 @@ export class PlayMatchComponent implements OnInit {
 
     const shotsTaken = this.penaltyTurns[this.currentShooter].length;
     const shooter = shooters[shotsTaken % shooters.length];
-
-    return `${shooter.name} (${teamCode})`;
+    this.lastShooter = shooter.name;
+    return `${shooter.name}`;
   }
 
   get filteredTeamsA(): Team[] {
@@ -251,6 +254,7 @@ export class PlayMatchComponent implements OnInit {
       this.matchClock = 0;
       this.goalLog = [];
       this.isMatchInProgress = false;
+      this.penaltyShootoutLog = [];
     }
   }
 
@@ -359,6 +363,8 @@ export class PlayMatchComponent implements OnInit {
 
   startPenaltyShootout() {
     this.penaltyPlayersByTeam.clear();
+    this.penaltyShootoutLog = [];
+    this.allPlayersByTeam.clear();
 
     const idA = this.selectedTeamA?.id;
     const idB = this.selectedTeamB?.id;
@@ -374,6 +380,8 @@ export class PlayMatchComponent implements OnInit {
 
       this.penaltyPlayersByTeam.set(idA, orderedA);
       this.penaltyPlayersByTeam.set(idB, orderedB);
+      this.allPlayersByTeam.set(idA, a);
+      this.allPlayersByTeam.set(idB, b);
 
       this.penaltyShootoutActive = true;
       this.isPenaltyInProgress = true;
@@ -392,14 +400,67 @@ export class PlayMatchComponent implements OnInit {
 
     const roll = Math.floor(Math.random() * 10) + 1;
     const result: '✅' | '❌' = roll <= 7 ? '✅' : '❌';
-
     this.penaltyTurns[this.currentShooter].push(result);
+
+    const team = this.currentShooter === 0 ? this.selectedTeamA : this.selectedTeamB;
+    const teamName = team?.name ?? 'Equipo';
+
+    const shooterName = this.lastShooter;
+    const isGenericShooter = shooterName === teamName;
+    const shooterPart = isGenericShooter ? '' : ` ${shooterName}`;
+
+    if (result === '✅') {
+      this.penaltyShootoutLog.push(`✅ ${teamName} ⚽${shooterPart}`);
+    } else {
+      const rival = this.currentShooter === 0 ? 1 : 0;
+      const goalkeeperName = this.getGoalkeeperName(rival);
+      switch (roll) {
+        case 8:
+          const hasGoalkeeper = goalkeeperName !== 'el arquero';
+          const hasShooter = !isGenericShooter;
+
+          let atajadaTexto = '';
+
+          if (!hasGoalkeeper && !hasShooter) {
+            atajadaTexto = 'Atajó el arquero';
+          } else if (hasGoalkeeper && !hasShooter) {
+            atajadaTexto = `Atajó ${goalkeeperName}`;
+          } else if (!hasGoalkeeper && hasShooter) {
+            atajadaTexto = `Atajó el arquero a ${shooterName}`;
+          } else {
+            atajadaTexto = `Atajó ${goalkeeperName} a ${shooterName}`;
+          }
+
+          this.penaltyShootoutLog.push(`❌ ${teamName} 🧤 ${atajadaTexto}`);
+          break;
+        case 9:
+          const paloOrTravesanio = Math.random() < 0.5 ? 'Palo' : 'Travesaño';
+          const paloTexto = isGenericShooter ? paloOrTravesanio : `${paloOrTravesanio} de ${shooterName}`;
+          this.penaltyShootoutLog.push(`❌ ${teamName} 🥅 ${paloTexto}`);
+          break;
+        case 10:
+          this.penaltyShootoutLog.push(`❌ ${teamName} 🎯 Afuera ${shooterPart}`);
+          break;
+      }
+    }
 
     this.checkPenaltyWinner();
 
     if (!this.penaltyWinner) {
       this.currentShooter = this.currentShooter === 0 ? 1 : 0;
     }
+  }
+
+  getGoalkeeperName(teamIndex: 0 | 1): string {
+    const team = teamIndex === 0 ? this.selectedTeamA : this.selectedTeamB;
+    const teamId = team?.id;
+    if (!teamId) return 'el arquero';
+
+    const players = this.allPlayersByTeam.get(teamId);
+    if (!players) return 'el arquero';
+
+    const keeper = players.find(p => p.position === 'ARQ');
+    return keeper?.name ?? 'el arquero';
   }
 
   checkPenaltyWinner() {
@@ -616,5 +677,6 @@ export class PlayMatchComponent implements OnInit {
     this.matchClock = 0;
     this.goalLog = [];
     this.isMatchInProgress = false;
+    this.penaltyShootoutLog = [];
   }
 }
