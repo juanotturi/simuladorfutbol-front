@@ -52,7 +52,9 @@ export class ApiService {
     );
   }
 
-  getRandomScorer(teamId: number) {
-    return this.http.get<Player>(`${this.BASE_URL}/players/team/${teamId}/random-scorer`);
+  getRandomScorer(teamId: number, isPenalty: boolean = false) {
+    return this.http.get<Player>(
+      `${this.BASE_URL}/players/team/${teamId}/random-scorer?isPenalty=${isPenalty}`
+    );
   }
 }

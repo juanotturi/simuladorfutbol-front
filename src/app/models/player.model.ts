@@ -5,4 +5,5 @@ export interface Player {
   goalProbability: number;
   position: string;
   penaltyOrder: number;
+  isPenaltyShooter: boolean;
 }

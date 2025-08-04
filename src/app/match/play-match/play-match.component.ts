@@ -43,7 +43,7 @@ export class PlayMatchComponent implements OnInit {
   penaltyVisible = false;
   penaltyTurns: ('✅' | '❌')[][] = [[], []];
   currentShooter: 0 | 1 = 0;
-  lastShooter: string = "";
+  lastShooters: string[] = ['', ''];
   penaltyWinner: Team | null = null;
   maxPenalties: number = 5;
   isSuddenDeath = false;
@@ -142,23 +142,20 @@ export class PlayMatchComponent implements OnInit {
   }
 
   getCurrentPenaltyShooter(): string {
-    const team = this.currentShooter === 0 ? this.selectedTeamA : this.selectedTeamB;
+    const teamIndex = this.currentShooter;
+    const team = teamIndex === 0 ? this.selectedTeamA : this.selectedTeamB;
     const teamId = team?.id;
-    const teamCode = team?.code;
     const teamName = team?.name ?? 'Equipo';
 
     if (!teamId) return teamName;
 
     const shooters = this.penaltyPlayersByTeam.get(teamId);
+    if (!shooters || shooters.length === 0) return teamName;
 
-    if (!shooters || shooters.length === 0) {
-      return teamName;
-    }
-
-    const shotsTaken = this.penaltyTurns[this.currentShooter].length;
+    const shotsTaken = this.penaltyTurns[teamIndex].length;
     const shooter = shooters[shotsTaken % shooters.length];
-    this.lastShooter = shooter.name;
-    return `${shooter.name}`;
+    this.lastShooters[teamIndex] = shooter.name;
+    return shooter.name;
   }
 
   get filteredTeamsA(): Team[] {
@@ -300,19 +297,22 @@ export class PlayMatchComponent implements OnInit {
   private pushGoalLog(team: Team, minute: number, side: 'A' | 'B') {
     const teamId = team.id;
     const has = this.teamHasPlayers.get(teamId) === true;
-
+    const isPenaltyGoal = Math.floor(Math.random() * 10) === 0;
     if (!has) {
-      this.goalLog.push(`⚽ Gol de ${team.name} (${minute}')`);
+      const penaltyTag = isPenaltyGoal ? ' —P—' : '';
+      this.goalLog.push(`⚽ Gol de ${team.name}${penaltyTag} (${minute}')`);
       return;
     }
 
-    this.apiService.getRandomScorer(teamId).subscribe({
+    this.apiService.getRandomScorer(teamId, isPenaltyGoal).subscribe({
       next: (author) => {
         const authorText = author ? ` — ${author.name}` : '';
-        this.goalLog.push(`⚽ Gol de ${team.name} ${authorText} (${minute}')`);
+        const penaltyTag = isPenaltyGoal ? ' —P—' : '';
+        this.goalLog.push(`⚽ Gol de ${team.name}${authorText}${penaltyTag} (${minute}')`);
       },
       error: () => {
-        this.goalLog.push(`⚽ Gol de ${team.name} (${minute}')`);
+        const penaltyTag = isPenaltyGoal ? ' —P—' : '';
+        this.goalLog.push(`⚽ Gol de ${team.name}${penaltyTag} (${minute}')`);
       }
     });
   }
@@ -405,8 +405,8 @@ export class PlayMatchComponent implements OnInit {
     const team = this.currentShooter === 0 ? this.selectedTeamA : this.selectedTeamB;
     const teamName = team?.name ?? 'Equipo';
 
-    const shooterName = this.lastShooter;
-    const isGenericShooter = shooterName === teamName;
+    const shooterName = this.lastShooters[this.currentShooter];
+    const isGenericShooter = !shooterName || shooterName.trim() === '' || shooterName === teamName;
     const shooterPart = isGenericShooter ? '' : ` ${shooterName}`;
 
     if (result === '✅') {
