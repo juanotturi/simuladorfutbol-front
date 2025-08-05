@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { Team } from '../../models/team.model';
 import { MatchResult } from '../../models/match-result.model';
-import { forkJoin, of } from 'rxjs';
+import { count, forkJoin, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -24,7 +24,7 @@ export class PlayMatchComponent implements OnInit {
   goalTimelineB: number[] = [];
   liveGoalsA = 0;
   liveGoalsB = 0;
-  goalLog: string[] = [];
+  incidentsLog: string[] = [];
   isMatchInProgress = false;
   isMatchPlayed = false;
   private teamHasPlayers = new Map<number, boolean>();
@@ -36,6 +36,8 @@ export class PlayMatchComponent implements OnInit {
   lastConfB: string | null = null;
   penaltyPlayersByTeam = new Map<number, { name: string }[]>();
   allPlayersByTeam = new Map<number, { name: string, position: string }[]>();
+  missedPenaltiesA: { minute: number, team: Team }[] = [];
+  missedPenaltiesB: { minute: number, team: Team }[] = [];
 
   placeholderImage = '/assets/placeholder_pelota.png';
 
@@ -193,7 +195,7 @@ export class PlayMatchComponent implements OnInit {
     this.matchResult = undefined;
     this.matchClock = 0;
     this.isMatchInProgress = true;
-    this.goalLog = [];
+    this.incidentsLog = [];
 
     const idA = this.selectedTeamA.id;
     const idB = this.selectedTeamB.id;
@@ -209,6 +211,7 @@ export class PlayMatchComponent implements OnInit {
         this.apiService.getMatchResult(this.selectedTeamA!.score, this.selectedTeamB!.score).subscribe({
           next: (result) => {
             this.matchResult = result;
+            this.generateMissedPenalties();
             this.generateGoalTimeline();
             this.startMatchClock();
           },
@@ -221,6 +224,7 @@ export class PlayMatchComponent implements OnInit {
         this.apiService.getMatchResult(this.selectedTeamA!.score, this.selectedTeamB!.score).subscribe({
           next: (result) => {
             this.matchResult = result;
+            this.generateMissedPenalties();
             this.generateGoalTimeline();
             this.startMatchClock();
           },
@@ -249,7 +253,7 @@ export class PlayMatchComponent implements OnInit {
       this.penaltyTurns = [[], []];
       this.isSuddenDeath = false;
       this.matchClock = 0;
-      this.goalLog = [];
+      this.incidentsLog = [];
       this.isMatchInProgress = false;
       this.penaltyShootoutLog = [];
     }
@@ -294,13 +298,13 @@ export class PlayMatchComponent implements OnInit {
     this.goalTimelineB = shuffled.slice(goalsA).sort((a, b) => a - b);
   }
 
-  private pushGoalLog(team: Team, minute: number, side: 'A' | 'B') {
+  private pushIncidentsLog(team: Team, minute: number, side: 'A' | 'B') {
     const teamId = team.id;
     const has = this.teamHasPlayers.get(teamId) === true;
     const isPenaltyGoal = Math.floor(Math.random() * 10) === 0;
     if (!has) {
       const penaltyTag = isPenaltyGoal ? ' —P—' : '';
-      this.goalLog.push(`⚽ Gol de ${team.name}${penaltyTag} (${minute}')`);
+      this.incidentsLog.push(`⚽ Gol de ${team.name}${penaltyTag} (${minute}')`);
       return;
     }
 
@@ -308,11 +312,11 @@ export class PlayMatchComponent implements OnInit {
       next: (author) => {
         const authorText = author ? ` — ${author.name}` : '';
         const penaltyTag = isPenaltyGoal ? ' —P—' : '';
-        this.goalLog.push(`⚽ Gol de ${team.name}${authorText}${penaltyTag} (${minute}')`);
+        this.incidentsLog.push(`⚽ Gol de ${team.name}${authorText}${penaltyTag} (${minute}')`);
       },
       error: () => {
         const penaltyTag = isPenaltyGoal ? ' —P—' : '';
-        this.goalLog.push(`⚽ Gol de ${team.name}${penaltyTag} (${minute}')`);
+        this.incidentsLog.push(`⚽ Gol de ${team.name}${penaltyTag} (${minute}')`);
       }
     });
   }
@@ -325,15 +329,17 @@ export class PlayMatchComponent implements OnInit {
     this.matchTimer = setInterval(() => {
       minute++;
       this.matchClock = minute;
-
+      const allMissed = [...this.missedPenaltiesA, ...this.missedPenaltiesB];
+      const missedNow = allMissed.filter(mp => mp.minute === minute);
+      missedNow.forEach(mp => this.pushMissedPenaltyLog(mp.team, minute));
       if (this.goalTimelineA.includes(minute) && this.selectedTeamA) {
         this.liveGoalsA++;
-        this.pushGoalLog(this.selectedTeamA, minute, 'A');
+        this.pushIncidentsLog(this.selectedTeamA, minute, 'A');
       }
 
       if (this.goalTimelineB.includes(minute) && this.selectedTeamB) {
         this.liveGoalsB++;
-        this.pushGoalLog(this.selectedTeamB, minute, 'B');
+        this.pushIncidentsLog(this.selectedTeamB, minute, 'B');
       }
 
       if (minute >= 90) {
@@ -341,6 +347,56 @@ export class PlayMatchComponent implements OnInit {
         this.isMatchPlayed = true;
       }
     }, intervalTime);
+  }
+
+  private pushMissedPenaltyLog(team: Team, minute: number) {
+    const teamId = team.id;
+    const has = this.teamHasPlayers.get(teamId) === true;
+
+    if (!has) {
+      this.incidentsLog.push(`❌ Penal fallado de ${team.name} (${minute}')`);
+      return;
+    }
+
+    const isPenalty = true;
+    this.apiService.getRandomScorer(teamId, isPenalty).subscribe({
+      next: (author) => {
+        const namePart = author ? ` —P— ${author.name}` : ' —P—';
+        this.incidentsLog.push(`❌ Penal fallado de ${team.name}${namePart} (${minute}')`);
+      },
+      error: () => {
+        this.incidentsLog.push(`❌ Penal fallado de ${team.name} (${minute}')`);
+      }
+    });
+  }
+
+  private generateMissedPenalties() {
+    const chances = [0, 1, 2];
+    const weights = [0.975, 0.024, 0.001];
+
+    const getCount = () => {
+      const r = Math.random();
+      let acc = 0;
+      for (let i = 0; i < weights.length; i++) {
+        acc += weights[i];
+        if (r < acc) return chances[i];
+      }
+      return 0;
+    };
+    const assignMinutes = (count: number): number[] => {
+      const set = new Set<number>();
+      while (set.size < count) {
+        const m = Math.floor(Math.random() * 90) + 1;
+        set.add(m);
+      }
+      return Array.from(set).sort((a, b) => a - b);
+    };
+    const countA = getCount();
+    const minutesA = assignMinutes(countA);
+    this.missedPenaltiesA = minutesA.map(minute => ({ minute, team: this.selectedTeamA! }));
+    const countB = getCount();
+    const minutesB = assignMinutes(countB);
+    this.missedPenaltiesB = minutesB.map(minute => ({ minute, team: this.selectedTeamB! }));
   }
 
   getMatchDurationInSeconds(): number {
@@ -675,7 +731,7 @@ export class PlayMatchComponent implements OnInit {
     this.penaltyTurns = [[], []];
     this.isSuddenDeath = false;
     this.matchClock = 0;
-    this.goalLog = [];
+    this.incidentsLog = [];
     this.isMatchInProgress = false;
     this.penaltyShootoutLog = [];
   }

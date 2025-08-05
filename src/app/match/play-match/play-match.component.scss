@@ -382,7 +382,7 @@
   width: 100%;
 }
 
-.goal-log-section {
+.incidents-log-section {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -391,7 +391,7 @@
 
 }
 
-.goal-log,
+.incidents-log,
 .penalty-shootout-log {
   padding: 8px 12px;
   border-radius: 8px;
@@ -400,14 +400,14 @@
   font-size: 14px;
 }
 
-.goal-log h4,
+.incidents-log h4,
 .penalty-shootout-log h4 {
   margin: 0 0 6px 0;
   font-size: 15px;
   color: #333;
 }
 
-.goal-log ul,
+.incidents-log ul,
 .penalty-shootout-log ul {
   margin: 0;
   padding-left: 18px;
