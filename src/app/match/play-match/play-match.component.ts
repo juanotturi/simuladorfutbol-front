@@ -203,10 +203,14 @@ export class PlayMatchComponent implements OnInit {
     forkJoin({
       a: this.teamHasPlayers.has(idA) ? of(this.teamHasPlayers.get(idA)!) : this.apiService.hasPlayers(idA),
       b: this.teamHasPlayers.has(idB) ? of(this.teamHasPlayers.get(idB)!) : this.apiService.hasPlayers(idB),
+      aPlayers: this.apiService.getPlayersByTeam(idA),
+      bPlayers: this.apiService.getPlayersByTeam(idB)
     }).subscribe({
-      next: ({ a, b }) => {
+      next: ({ a, b, aPlayers, bPlayers }) => {
         this.teamHasPlayers.set(idA, !!a);
         this.teamHasPlayers.set(idB, !!b);
+        this.allPlayersByTeam.set(idA, aPlayers);
+        this.allPlayersByTeam.set(idB, bPlayers);
 
         this.apiService.getMatchResult(this.selectedTeamA!.score, this.selectedTeamB!.score).subscribe({
           next: (result) => {
@@ -215,7 +219,9 @@ export class PlayMatchComponent implements OnInit {
             this.generateGoalTimeline();
             this.startMatchClock();
           },
-          error: () => { this.isLoading = false; }
+          error: () => {
+            this.isLoading = false;
+          }
         });
       },
       error: () => {
@@ -228,7 +234,9 @@ export class PlayMatchComponent implements OnInit {
             this.generateGoalTimeline();
             this.startMatchClock();
           },
-          error: () => { this.isLoading = false; }
+          error: () => {
+            this.isLoading = false;
+          }
         });
       }
     });
@@ -352,27 +360,70 @@ export class PlayMatchComponent implements OnInit {
   private pushMissedPenaltyLog(team: Team, minute: number) {
     const teamId = team.id;
     const has = this.teamHasPlayers.get(teamId) === true;
+    const teamName = team.name;
 
-    if (!has) {
-      this.incidentsLog.push(`❌ Penal fallado de ${team.name} (${minute}')`);
-      return;
-    }
+    const outcomeRoll = Math.floor(Math.random() * 6) + 1;
+    const genericText = 'erró un penal';
 
-    const isPenalty = true;
-    this.apiService.getRandomScorer(teamId, isPenalty).subscribe({
+    this.apiService.getRandomScorer(teamId, true).subscribe({
       next: (author) => {
-        const namePart = author ? ` —P— ${author.name}` : ' —P—';
-        this.incidentsLog.push(`❌ Penal fallado de ${team.name}${namePart} (${minute}')`);
+        const shooterName = author?.name ?? '';
+        const isGenericShooter = !shooterName || shooterName.trim() === '';
+        const shooterPart = isGenericShooter ? '' : ` ${shooterName}`;
+
+        switch (outcomeRoll) {
+          case 1:
+          case 2:
+            const goalkeeperName = this.getGoalkeeperName(teamId === this.selectedTeamA?.id ? 1 : 0);
+            const hasGoalkeeper = goalkeeperName !== 'el arquero';
+            const hasShooter = !isGenericShooter;
+
+            let atajadaTexto = '';
+
+            if (!hasGoalkeeper && !hasShooter) {
+              atajadaTexto = 'Atajó el arquero';
+            } else if (hasGoalkeeper && !hasShooter) {
+              atajadaTexto = `Atajó ${goalkeeperName}`;
+            } else if (!hasGoalkeeper && hasShooter) {
+              atajadaTexto = `Atajó el arquero a${shooterPart}`;
+            } else {
+              atajadaTexto = `Atajó ${goalkeeperName} a${shooterPart}`;
+            }
+
+            this.incidentsLog.push(`❌ ${teamName} ` + genericText + ` 🧤 ${atajadaTexto} (${minute}')`);
+            break;
+
+          case 3:
+            if (isGenericShooter) {
+              this.incidentsLog.push(`❌ ${teamName} ` + genericText + ` 🥅 Travesaño (${minute}')`);
+            } else {
+              this.incidentsLog.push(`❌ ${teamName} ` + genericText + ` 🥅 Travesaño de${shooterPart} (${minute}')`);
+            }
+            break;
+
+          case 4:
+            if (isGenericShooter) {
+              this.incidentsLog.push(`❌ ${teamName} ` + genericText + ` 🥅 Palo (${minute}')`);
+            } else {
+              this.incidentsLog.push(`❌ ${teamName} ` + genericText + ` 🥅 Palo de${shooterPart} (${minute}')`);
+            }
+            break;
+
+          case 5:
+          case 6:
+            this.incidentsLog.push(`❌ ${teamName} ` + genericText + ` 🎯 Afuera${shooterPart} (${minute}')`);
+            break;
+        }
       },
       error: () => {
-        this.incidentsLog.push(`❌ Penal fallado de ${team.name} (${minute}')`);
+        this.incidentsLog.push(`❌ Penal errado de ${teamName} (${minute}')`);
       }
     });
   }
 
   private generateMissedPenalties() {
     const chances = [0, 1, 2];
-    const weights = [0.975, 0.024, 0.001];
+    const weights = [0.97, 0.029, 0.001];
 
     const getCount = () => {
       const r = Math.random();
